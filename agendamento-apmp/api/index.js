@@ -15,9 +15,12 @@ const {
   msgRejeicao
 } = require('../lib/mensagens');
 
+const path = require('path');
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Conecta ao MongoDB em cada request (padrão serverless — conexão é cacheada)
 app.use(async (req, res, next) => {
@@ -334,8 +337,6 @@ function getSegundaAtual() {
 
 // Servidor local (desenvolvimento)
 if (require.main === module) {
-  const path = require('path');
-  app.use(express.static(path.join(__dirname, '../public')));
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`\n✅ Servidor rodando em http://localhost:${PORT}`);
