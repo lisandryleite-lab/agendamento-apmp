@@ -40,7 +40,10 @@ const NO_RAILWAY       = !process.env.RAILWAY_ENVIRONMENT;
 function log(nivel, msg) {
   const linha = `[${new Date().toISOString()}] [${nivel.toUpperCase()}] ${msg}`;
   console.log(linha);
-  try { fs.appendFileSync(LOG_FILE, linha + '\n', 'utf8'); } catch {}
+  // Arquivo de log apenas em ambiente local (Railway usa stdout)
+  if (NO_RAILWAY) {
+    try { fs.appendFileSync(LOG_FILE, linha + '\n', 'utf8'); } catch {}
+  }
 }
 const info  = msg => log('info',  msg);
 const erro  = msg => log('erro',  msg);

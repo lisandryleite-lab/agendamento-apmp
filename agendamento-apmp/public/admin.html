@@ -587,8 +587,8 @@
   }
 
   function navegarSemana(qual, delta) {
-    if (qual === 'psico') { semanaOffsetPsico += delta; renderPsico(); }
-    else { semanaOffsetSala += delta; renderSala(); }
+    if (qual === 'psico') { semanaOffsetPsico = Math.max(0, semanaOffsetPsico + delta); renderPsico(); }
+    else { semanaOffsetSala = Math.max(0, semanaOffsetSala + delta); renderSala(); }
   }
 
   // ── Histórico (agrupado por semana) ─────────────────────────────────────
@@ -626,7 +626,7 @@
         const [badgeClass, badgeText] = badgeMap[p.status] || ['badge-rejeitado', p.status];
         const horarioInfo = tipo === 'terapia' ? `${p.dataFormatada || ''} ${p.horario || ''}` : `${p.dataFormatada || ''} ${p.horarioSala || ''}`;
         const btnDeclaracao = p.status === 'aprovado'
-          ? `<button class="btn" style="background:var(--dourado);color:white;font-size:11px;" onclick="gerarDeclaracao(${JSON.stringify(JSON.stringify(p))})">📄 Declaração PDF</button>`
+          ? `<button class="btn" style="background:var(--dourado);color:white;font-size:11px;" data-ag="${escape(JSON.stringify(p))}" onclick="gerarDeclaracaoFromBtn(this)">📄 Declaração PDF</button>`
           : '';
         return `<div class="hist-item">
           <div>${icone} <strong>${escape(p.nomeGuerra || '')}</strong> · AL ${escape(p.al)} · ${escape(horarioInfo)}
@@ -673,8 +673,11 @@
     } catch (err) { alert('Erro: ' + err.message); }
   }
 
-  function gerarDeclaracao(jsonStr) {
-    const p = JSON.parse(jsonStr);
+  function gerarDeclaracaoFromBtn(btn) {
+    gerarDeclaracao(JSON.parse(btn.dataset.ag));
+  }
+
+  function gerarDeclaracao(p) {
     const tipo = p.tipo === 'terapia' ? 'atendimento psicológico' : 'uso da sala de psicologia';
     const horarioInfo = p.tipo === 'terapia' ? (p.horario || '') : (p.horarioSala || '');
     const dataAtual = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });

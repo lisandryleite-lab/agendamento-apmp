@@ -1,7 +1,8 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 
-const express = require('express');
-const cors    = require('cors');
+const express   = require('express');
+const cors       = require('cors');
+const rateLimit  = require('express-rate-limit');
 
 const { connect }  = require('../lib/db');
 const Agendamento  = require('../lib/models/Agendamento');
@@ -18,8 +19,28 @@ const {
 const path = require('path');
 
 const app = express();
-app.use(cors());
+app.set('trust proxy', 1);
+
+// CORS restrito ao domínio da Vercel e localhost para dev
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || /agendamento-apmp\.vercel\.app$/.test(origin) || /localhost/.test(origin)) {
+      cb(null, true);
+    } else {
+      cb(new Error('CORS: origem não permitida'));
+    }
+  }
+}));
 app.use(express.json({ limit: '2mb' }));
+
+// Rate limit: máx 10 agendamentos por IP a cada 15 min
+const limiterAgendamento = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { erro: 'Muitas solicitações. Aguarde alguns minutos e tente novamente.' }
+});
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Conecta ao MongoDB em cada request (padrão serverless — conexão é cacheada)
@@ -63,8 +84,8 @@ app.get('/api/agendamentos', exigirAuth, async (req, res) => {
   }
 });
 
-// POST /api/agendamentos — nova solicitação (público)
-app.post('/api/agendamentos', async (req, res) => {
+// POST /api/agendamentos — nova solicitação (público, rate limitado)
+app.post('/api/agendamentos', limiterAgendamento, async (req, res) => {
   try {
     const { tipo, nomeGuerra, al, pel, cia, zap, observacao, dataIso, dataFormatada, horario, horarioSala } = req.body;
 
@@ -83,16 +104,13 @@ app.post('/api/agendamentos', async (req, res) => {
       status: 'pendente'
     });
 
-    // Notifica titular da CIA via WhatsApp (falha silenciosamente)
-    const TITULARES = {
-      '1': process.env.TITULAR_1_ZAP || null,
-      '2': process.env.TITULAR_2_ZAP || null
-    };
-    const zapTitular = TITULARES[cia];
-    if (zapTitular) {
-      const msg = msgNovaRequisicao({ tipo, nomeGuerra, al, pel, cia, dataFormatada, horario, horarioSala });
-      enviarMensagem(zapTitular, msg).catch(e => console.error('[WhatsApp] Titular:', e.message));
-    }
+    // Notifica todos os titulares da CIA via WhatsApp (vírgula separa múltiplos números)
+    const parseNums = env => env ? env.split(',').map(n => n.trim()).filter(Boolean) : [];
+    const TITULARES = { '1': parseNums(process.env.TITULAR_1_ZAP), '2': parseNums(process.env.TITULAR_2_ZAP) };
+    const msg = msgNovaRequisicao({ tipo, nomeGuerra, al, pel, cia, dataFormatada, horario, horarioSala });
+    (TITULARES[cia] || []).forEach(zap => {
+      enviarMensagem(zap, msg).catch(e => console.error('[WhatsApp] Titular:', e.message));
+    });
 
     res.status(201).json({ data: { id: agendamento._id } });
   } catch (err) {

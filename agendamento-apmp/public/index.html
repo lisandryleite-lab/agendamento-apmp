@@ -300,6 +300,36 @@
   }
   .protocolo-chave strong { color: var(--verde-escuro); font-weight: 600; }
 
+  /* ── Passos ricos nos protocolos ── */
+  .protocolo-passos li { padding: 16px 0 16px 52px; }
+  .protocolo-passos li::before { top: 18px; }
+  .passo-fase {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-bottom: 6px;
+  }
+  .passo-fase.antes  { background: #E5EDF8; color: #1F4F9E; }
+  .passo-fase.no-dia { background: #FAEEDA; color: #854F0B; }
+  .passo-fase.apos   { background: var(--verde-claro); color: var(--verde-escuro); }
+  .passo-titulo  { display: block; font-weight: 600; color: var(--grafite); font-size: 14px; margin-bottom: 4px; }
+  .passo-detalhe { display: block; font-size: 13px; color: var(--cinza-texto); line-height: 1.55; }
+  .protocolo-nota {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: var(--creme-claro);
+    border-radius: 8px;
+    border-left: 3px solid var(--dourado);
+    font-size: 12.5px;
+    color: var(--cinza-texto);
+    line-height: 1.55;
+  }
+  .protocolo-nota strong { color: var(--verde-escuro); }
+
   .faq { background: var(--creme-claro); border-radius: 16px; padding: 8px 20px; border: 1px solid var(--cinza-borda); }
   .faq-item { border-bottom: 1px solid var(--cinza-borda); }
   .faq-item:last-child { border-bottom: none; }
@@ -575,38 +605,101 @@
   <section class="section">
     <span class="section-tag">Como funciona</span>
     <h2 class="section-title">Protocolos da APMP.</h2>
-    <p class="section-lead">Dois fluxos distintos. <strong>Protocolo A</strong>: sessão com o psicólogo da APMP. <strong>Protocolo B</strong>: reserva da sala para atendimento online com psicólogo particular.</p>
+    <p class="section-lead">Dois fluxos distintos. <strong>Protocolo A</strong>: sessão presencial com o psicólogo da APMP (terças e quintas). <strong>Protocolo B</strong>: uso da sala para atendimento online com psicólogo particular — disponível 24h.</p>
 
     <div class="protocolos-grid">
 
       <!-- CARD A: Sessão com psicólogo APMP -->
       <div class="protocolo">
-        <span class="protocolo-tag">🧠 Card A · Sessão APMP</span>
+        <span class="protocolo-tag">🧠 Protocolo A · Sessão APMP</span>
         <div class="protocolo-letra">Protocolo A</div>
         <h3 class="protocolo-titulo">Sessão com o psicólogo da APMP</h3>
 
         <ol class="protocolo-passos">
-          <li>Fazer agendamento no site e aguardar confirmação</li>
-          <li>Avisar ao xerife/auxiliar ou adjunto</li>
-          <li>Aproveitar a sessão e retorno à instrução</li>
+          <li>
+            <span class="passo-fase antes">Antes do dia</span>
+            <span class="passo-titulo">📱 Agendamento no site</span>
+            <span class="passo-detalhe">Acesse o site e solicite sua sessão preenchendo o formulário. Aguarde confirmação por WhatsApp — respondida em até 24h úteis.</span>
+          </li>
+          <li>
+            <span class="passo-fase antes">Antes do dia</span>
+            <span class="passo-titulo">🪖 Comunicar ao Xerife</span>
+            <span class="passo-detalhe">Informe ao seu Xerife que irá ao atendimento psicológico. Faça isso com antecedência, não no próprio dia da sessão.</span>
+          </li>
+          <li>
+            <span class="passo-fase no-dia">No dia</span>
+            <span class="passo-titulo">📋 Informar Auxiliar/Adjunto</span>
+            <span class="passo-detalhe">Antes de sair, informe ao Auxiliar ou Adjunto da sua CIA sobre o atendimento.</span>
+          </li>
+          <li>
+            <span class="passo-fase no-dia">No dia</span>
+            <span class="passo-titulo">🔑 Retirar a chave na guarda</span>
+            <span class="passo-detalhe">Combine com o Auxiliar/Adjunto quem busca a chave — você ou ele. A chave fica na guarda com o efetivo de serviço, mediante registro.</span>
+          </li>
+          <li>
+            <span class="passo-fase no-dia">No dia</span>
+            <span class="passo-titulo">🧠 Aproveitar a sessão</span>
+            <span class="passo-detalhe">Sessão de 40 minutos com o psicólogo Murilo. Todo o conteúdo é protegido por sigilo profissional (CFP).</span>
+          </li>
+          <li>
+            <span class="passo-fase apos">Após</span>
+            <span class="passo-titulo">✅ Conclusão e retorno</span>
+            <span class="passo-detalhe">Devolva a chave à guarda ao fim da sessão. Dê retorno ao responsável pela psicologia e reintegre-se normalmente à instrução.</span>
+          </li>
         </ol>
+
+        <div class="protocolo-nota">
+          🔑 <strong>Chave:</strong> fica na guarda com o efetivo de serviço, mediante registro de retirada e devolução.
+        </div>
       </div>
 
       <!-- CARD B: Reserva da sala -->
       <div class="protocolo protocolo-sala">
-        <span class="protocolo-tag">🚪 Card B · Reserva da sala</span>
+        <span class="protocolo-tag">🚪 Protocolo B · Reserva da sala</span>
         <div class="protocolo-letra">Protocolo B</div>
         <h3 class="protocolo-titulo">Reserva da sala — atendimento online particular</h3>
 
         <ol class="protocolo-passos">
-          <li>Agendar com seu psicólogo ou Escuta SUSP</li>
-          <li>Reservar a sala no site</li>
-          <li>Aguardar confirmação da reserva</li>
-          <li>No dia da sessão, confirme com seu psicólogo</li>
-          <li>Após confirmar, informe ao xerife, auxiliar e adjunto</li>
-          <li>Acesso à sala — retire a chave na guarda</li>
-          <li>Conclusão — devolva a sala em ordem e devolva a chave na guarda</li>
+          <li>
+            <span class="passo-fase antes">Antes</span>
+            <span class="passo-titulo">📅 Agendar com seu psicólogo</span>
+            <span class="passo-detalhe">Confirme data e horário com seu psicólogo particular, ou acesse o <strong>Escuta SUSP</strong> (gratuito, online, sem hierarquia).</span>
+          </li>
+          <li>
+            <span class="passo-fase antes">Antes</span>
+            <span class="passo-titulo">💻 Reservar a sala no site</span>
+            <span class="passo-detalhe">Acesse a agenda da sala, escolha o horário e envie a solicitação. A disponibilidade é 24h por dia.</span>
+          </li>
+          <li>
+            <span class="passo-fase antes">Antes</span>
+            <span class="passo-titulo">✅ Aguardar confirmação</span>
+            <span class="passo-detalhe">Você receberá confirmação por WhatsApp do titular da sua CIA. <strong>Só utilize a sala após o retorno</strong>.</span>
+          </li>
+          <li>
+            <span class="passo-fase no-dia">No dia</span>
+            <span class="passo-titulo">📱 Confirmar com seu psicólogo</span>
+            <span class="passo-detalhe">Antes de buscar a chave, confirme que a sessão acontecerá no horário previsto para evitar deslocamentos desnecessários.</span>
+          </li>
+          <li>
+            <span class="passo-fase no-dia">No dia</span>
+            <span class="passo-titulo">🪖 Informar a cadeia de comando</span>
+            <span class="passo-detalhe">Avise ao Xerife, Auxiliar e Adjunto da CIA antes de se ausentar para a sessão.</span>
+          </li>
+          <li>
+            <span class="passo-fase no-dia">No dia</span>
+            <span class="passo-titulo">🔑 Retirar a chave na guarda</span>
+            <span class="passo-detalhe">Retire a chave junto ao efetivo de serviço da guarda, mediante registro. Combine com o Adj. quem busca.</span>
+          </li>
+          <li>
+            <span class="passo-fase apos">Após</span>
+            <span class="passo-titulo">🧹 Conclusão e devolução</span>
+            <span class="passo-detalhe">Deixe a sala em ordem (como encontrou). Devolva a chave à guarda e confirme o registro de devolução com o efetivo.</span>
+          </li>
         </ol>
+
+        <div class="protocolo-nota">
+          🔑 <strong>Chave:</strong> fica na guarda com o efetivo de serviço, mediante registro de retirada e devolução.
+        </div>
       </div>
 
     </div>
@@ -1100,6 +1193,7 @@
     document.getElementById('tipoBtnSala').classList.toggle('ativo', tipo === 'sala');
     document.getElementById('campos-terapia').style.display = tipo === 'terapia' ? 'block' : 'none';
     document.getElementById('campos-sala').style.display = tipo === 'sala' ? 'block' : 'none';
+    if (tipo === 'sala') document.getElementById('dataSala').min = isoDate(new Date());
 
     if (tipo === 'terapia') {
       document.getElementById('modalTitulo').textContent = 'Agendar terapia';
