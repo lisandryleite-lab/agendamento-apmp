@@ -9,8 +9,9 @@
 
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const { Boom }      = require('@hapi/boom');
+const QRCode        = require('qrcode-terminal');
 const mongoose      = require('mongoose');
 const fs            = require('fs');
 const path          = require('path');
@@ -42,17 +43,25 @@ let pronto = false;
 
 async function conectar() {
   const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
+  const { version } = await fetchLatestBaileysVersion();
+  info(`Usando protocolo WA v${version.join('.')}`);
 
   sock = makeWASocket({
-    auth:               state,
-    printQRInTerminal:  true,
-    logger:             pino({ level: 'silent' }),
-    browser:            ['APMP-Bot', 'Chrome', '1.0.0'],
+    version,
+    auth:    state,
+    logger:  pino({ level: 'silent' }),
+    browser: ['APMP-Bot', 'Chrome', '1.0.0'],
   });
 
   sock.ev.on('creds.update', saveCreds);
 
-  sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
+  sock.ev.on('connection.update', ({ qr, connection, lastDisconnect }) => {
+    if (qr) {
+      console.log('\n📱 Escaneie o QR code abaixo com o WhatsApp (Menu → Aparelhos conectados):\n');
+      QRCode.generate(qr, { small: true });
+      info('QR code exibido — aguardando escaneamento...');
+    }
+
     if (connection === 'open') {
       pronto = true;
       info('WhatsApp conectado. Bot ativo.');
