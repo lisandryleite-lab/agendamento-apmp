@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agendamento de Psicologia — APMP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde-escuro: #0F4D3F;
+    --verde-medio: #1D6E5A;
+    --verde-claro: #E8F1ED;
+    --creme: #FAF7F0;
+    --creme-claro: #FDFCF7;
+    --dourado: #B8924A;
+    --dourado-claro: #DDB876;
+    --dourado-brilho: #E8B921;
+    --grafite: #2C2C2A;
+    --cinza-texto: #5F5E5A;
+    --cinza-borda: rgba(15, 77, 63, 0.12);
+    --vermelho: #A32D2D;
+    --vermelho-emerg: #C73E3E;
+    --vermelho-pmpe: #B8232A;
+    --azul-das: #1F4F9E;
+    --amarelo: #BA7517;
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Inter', -apple-system, sans-serif;
+    --shadow-sm: 0 1px 3px rgba(15, 77, 63, 0.06);
+    --shadow-md: 0 4px 16px rgba(15, 77, 63, 0.08);
+    --shadow-lg: 0 12px 40px rgba(15, 77, 63, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--sans); color: var(--grafite); background: var(--creme); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+  .emerg-bar { background: var(--vermelho-emerg); color: white; padding: 10px 20px; text-align: center; font-size: 13px; font-weight: 500; display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .emerg-bar a { color: white; text-decoration: underline; font-weight: 700; }
+
+  /* ============ HERO TIPOGRÁFICO (v4.1) ============ */
+  .hero { background: linear-gradient(180deg, var(--verde-escuro) 0%, var(--verde-medio) 100%); color: var(--creme-claro); padding: 64px 24px 64px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before, .hero::after { content: ''; position: absolute; width: 60%; height: 200%; background: radial-gradient(circle, rgba(221, 184, 118, 0.08) 0%, transparent 60%); pointer-events: none; }
+  .hero::before { top: -50%; left: -10%; }
+  .hero::after { bottom: -50%; right: -10%; }
+
+  .institucional {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 34px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .institucional-linha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .institucional-sigla {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(22px, 4vw, 30px);
+    letter-spacing: 0.18em;
+    color: var(--dourado-claro);
+    line-height: 1;
+    padding: 2px 0;
+  }
+  .institucional-sep {
+    color: var(--dourado);
+    font-family: var(--serif);
+    font-size: clamp(18px, 3vw, 24px);
+    opacity: 0.55;
+    font-weight: 300;
+  }
+  .institucional-base {
+    width: 64px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--dourado-claro), transparent);
+    opacity: 0.5;
+  }
+  .institucional-rodape {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(221, 184, 118, 0.75);
+    line-height: 1.4;
+    max-width: 480px;
+  }
+
+  .hero-tag { display: inline-block; background: rgba(221, 184, 118, 0.18); border: 1px solid rgba(221, 184, 118, 0.35); color: var(--dourado-claro); padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 20px; position: relative; z-index: 1; }
+  .hero h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(28px, 5vw, 42px); line-height: 1.15; letter-spacing: -0.02em; max-width: 720px; margin: 0 auto 16px; position: relative; z-index: 1; }
+  .hero h1 em { font-style: italic; color: var(--dourado-claro); }
+  .hero p { font-size: 16px; max-width: 560px; margin: 0 auto; opacity: 0.88; position: relative; z-index: 1; }
+  .hero-ctas { margin-top: 32px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
+  .btn-hero { display: inline-flex; align-items: center; gap: 10px; padding: 14px 24px; border-radius: 100px; text-decoration: none; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: var(--shadow-md); font-family: var(--sans); }
+  .btn-hero.primario { background: var(--dourado); color: var(--grafite); }
+  .btn-hero.secundario { background: rgba(255,255,255,0.1); color: var(--creme-claro); border: 1px solid rgba(255,255,255,0.3); }
+  .btn-hero:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+  .container { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+  .section { padding: 56px 0; border-bottom: 1px solid var(--cinza-borda); }
+  .section:last-child { border-bottom: none; }
+  .section-tag { display: inline-block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--dourado); font-weight: 600; margin-bottom: 12px; }
+  .section-title { font-family: var(--serif); font-weight: 500; font-size: clamp(24px, 4vw, 32px); color: var(--verde-escuro); margin-bottom: 16px; line-height: 1.2; letter-spacing: -0.01em; }
+  .section-lead { font-size: 17px; color: var(--cinza-texto); max-width: 640px; margin-bottom: 32px; line-height: 1.65; }
+  .importancia { background: var(--creme-claro); border-left: 3px solid var(--dourado); padding: 28px 32px; margin-top: 24px; border-radius: 4px; }
+  .importancia p { font-family: var(--serif); font-size: 19px; line-height: 1.55; color: var(--grafite); font-style: italic; }
+  .importancia p + p { margin-top: 14px; font-size: 16px; font-style: normal; color: var(--cinza-texto); font-family: var(--sans); }
+  .mitos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+  .mito-card { background: white; border-radius: 14px; padding: 24px; border: 1px solid var(--cinza-borda); box-shadow: var(--shadow-sm); }
+  .mito-label { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 10px; }
+  .mito-label.mito { background: #FCEBEB; color: var(--vermelho); }
+  .mito-label.fato { background: var(--verde-claro); color: var(--verde-escuro); margin-top: 16px; }
+  .mito-frase { font-family: var(--serif); font-size: 17px; font-weight: 500; color: var(--grafite); margin-bottom: 6px; line-height: 1.4; }
+  .mito-frase.tachada { text-decoration: line-through; color: var(--cinza-texto); }
+  .mito-resposta { font-size: 14px; color: var(--cinza-texto); line-height: 1.65; }
+  .mito-resposta strong { color: var(--verde-escuro); }
+
+  /* ============ PSICÓLOGO (v4.1) ============ */
+  .psicologo { display: grid; grid-template-columns: auto 1fr; gap: 24px; background: white; padding: 28px; border-radius: 16px; border: 1px solid var(--cinza-borda); box-shadow: var(--shadow-sm); align-items: start; }
+  .psicologo-avatar { width: 88px; height: 88px; border-radius: 50%; background: var(--verde-claro); color: var(--verde-escuro); display: flex; align-items: center; justify-content: center; border: 2px solid var(--verde-medio); font-size: 36px; flex-shrink: 0; }
+  .psicologo-nome { font-family: var(--serif); font-size: 24px; font-weight: 600; color: var(--verde-escuro); margin-bottom: 4px; line-height: 1.2; }
+  .psicologo-role { font-size: 12px; color: var(--dourado); font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 14px; }
+  .psicologo-bio { font-size: 14.5px; color: var(--cinza-texto); line-height: 1.7; }
+  .psicologo-bio strong { color: var(--grafite); font-weight: 600; }
+  .psicologo-bio ul { margin-top: 6px; padding-left: 18px; }
+  .psicologo-bio li { margin-bottom: 4px; }
+  .psicologo-bio + .psicologo-bio { margin-top: 14px; }
+  .psicologo-pessoa {
+    margin-top: 18px;
+    padding: 16px 18px;
+    background: var(--creme-claro);
+    border-left: 3px solid var(--verde-medio);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--cinza-texto);
+    line-height: 1.7;
+    font-style: italic;
+  }
+  .psicologo-pessoa strong { color: var(--verde-escuro); font-style: normal; font-weight: 600; }
+  .sigilo-nota { background: var(--verde-claro); border-left: 3px solid var(--verde-medio); padding: 14px 18px; margin-top: 16px; border-radius: 6px; font-size: 13px; color: var(--verde-escuro); line-height: 1.55; }
+  .sigilo-nota strong { font-weight: 600; }
+
+  .agenda-tabs { display: flex; gap: 4px; margin-bottom: 24px; background: white; padding: 6px; border-radius: 14px; border: 1px solid var(--cinza-borda); width: fit-content; max-width: 100%; overflow-x: auto; }
+  .agenda-tab { padding: 10px 18px; border: none; background: transparent; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--cinza-texto); font-family: var(--sans); white-space: nowrap; }
+  .agenda-tab.ativo { background: var(--verde-escuro); color: white; }
+  .agenda-tab:hover:not(.ativo) { background: var(--verde-claro); color: var(--verde-escuro); }
+  .agenda-conteudo { display: none; }
+  .agenda-conteudo.ativo { display: block; }
+  .agenda-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  .agenda-titulo { font-family: var(--serif); font-size: 20px; color: var(--verde-escuro); font-weight: 600; }
+  .agenda-sub { font-size: 14px; color: var(--cinza-texto); }
+  .agenda-nav { display: flex; gap: 6px; align-items: center; }
+  .agenda-nav button { background: white; border: 1px solid var(--cinza-borda); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--verde-escuro); font-family: var(--sans); font-weight: 500; transition: all 0.2s; }
+  .agenda-nav button:hover { background: var(--verde-claro); border-color: var(--verde-medio); }
+  .agenda-nav-label { font-size: 13px; color: var(--grafite); font-weight: 600; min-width: 130px; text-align: center; }
+  .agenda-info { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 500; }
+  .chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .chip-livre { background: #E1F5EE; color: var(--verde-escuro); }
+  .chip-livre .chip-dot { background: var(--verde-medio); }
+  .chip-pendente { background: #FAEEDA; color: #854F0B; }
+  .chip-pendente .chip-dot { background: var(--amarelo); }
+  .chip-ocupado { background: #FCEBEB; color: var(--vermelho); }
+  .chip-ocupado .chip-dot { background: var(--vermelho); }
+  .dia-bloco { margin-bottom: 20px; }
+  .dia-titulo { font-family: var(--serif); font-size: 16px; font-weight: 600; color: var(--verde-escuro); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px solid var(--verde-claro); }
+  .dia-titulo .data { color: var(--dourado); font-size: 13px; font-weight: 500; margin-left: 8px; }
+  .horarios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .horario { background: white; border: 1px solid var(--cinza-borda); border-radius: 10px; padding: 12px; cursor: pointer; transition: all 0.2s; }
+  .horario:hover:not(.indisponivel) { border-color: var(--verde-medio); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .horario.indisponivel { background: #FAFAF6; cursor: not-allowed; opacity: 0.6; }
+  .horario-hora { font-family: var(--serif); font-size: 18px; font-weight: 600; color: var(--verde-escuro); margin-bottom: 4px; }
+  .horario-status { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; }
+  .horario.livre .horario-status { color: var(--verde-medio); }
+  .horario.pendente .horario-status { color: var(--amarelo); }
+  .horario.indisponivel .horario-status { color: var(--vermelho); }
+  .sala-tabela { background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--cinza-borda); box-shadow: var(--shadow-sm); }
+  .sala-tabela-wrap { overflow: auto; max-height: 540px; }
+  .sala-tabela table { width: 100%; min-width: 700px; border-collapse: collapse; }
+  .sala-tabela th { background: var(--verde-escuro); color: var(--creme-claro); padding: 10px 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; text-align: center; line-height: 1.3; position: sticky; top: 0; z-index: 2; }
+  .sala-tabela th:first-child { background: var(--verde-medio); width: 80px; left: 0; z-index: 3; }
+  .sala-tabela th .data-curta { display: block; font-size: 9px; opacity: 0.8; margin-top: 2px; font-weight: 500; }
+  .sala-tabela td { padding: 2px; border-top: 1px solid var(--cinza-borda); border-left: 1px solid var(--cinza-borda); vertical-align: middle; height: 38px; }
+  .sala-tabela td:first-child { background: var(--creme-claro); font-family: var(--serif); font-weight: 600; color: var(--verde-escuro); font-size: 12px; text-align: center; border-left: none; position: sticky; left: 0; z-index: 1; }
+  .sala-slot { padding: 4px 6px; border-radius: 5px; font-size: 10px; cursor: pointer; min-height: 30px; line-height: 1.2; display: flex; align-items: center; justify-content: center; text-align: center; }
+  .sala-slot.livre { background: transparent; color: var(--cinza-texto); border: 1px dashed var(--cinza-borda); }
+  .sala-slot.livre:hover { background: var(--verde-claro); border-style: solid; border-color: var(--verde-medio); color: var(--verde-escuro); }
+  .sala-slot.ocupado { background: #FCEBEB; color: var(--vermelho); font-weight: 500; cursor: not-allowed; }
+  .sala-slot.indisponivel { background: #F0E8D9; color: #854F0B; font-style: italic; cursor: not-allowed; }
+  .sala-slot.pendente { background: #FAEEDA; color: #854F0B; font-weight: 500; }
+
+  /* ============ PROTOCOLOS EM 2 CARDS (v4.1) ============ */
+  .protocolos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 20px;
+  }
+  .protocolo {
+    background: white;
+    border-radius: 16px;
+    padding: 28px 26px;
+    border: 1px solid var(--cinza-borda);
+    box-shadow: var(--shadow-sm);
+    border-top: 4px solid var(--verde-medio);
+    display: flex;
+    flex-direction: column;
+  }
+  .protocolo.protocolo-sala {
+    border-top-color: var(--dourado);
+  }
+  .protocolo-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    background: var(--verde-claro);
+    color: var(--verde-escuro);
+    margin-bottom: 12px;
+    align-self: flex-start;
+  }
+  .protocolo.protocolo-sala .protocolo-tag {
+    background: #FAEEDA;
+    color: #854F0B;
+  }
+  .protocolo-letra {
+    font-family: var(--serif);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--dourado);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .protocolo-titulo {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--verde-escuro);
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+  .protocolo-desc {
+    font-size: 14px;
+    color: var(--cinza-texto);
+    margin-bottom: 22px;
+    line-height: 1.6;
+  }
+  .protocolo-passos {
+    list-style: none;
+    counter-reset: passo;
+  }
+  .protocolo-passos li {
+    counter-increment: passo;
+    padding: 14px 0 14px 48px;
+    border-bottom: 1px solid var(--cinza-borda);
+    position: relative;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .protocolo-passos li:last-child { border-bottom: none; padding-bottom: 0; }
+  .protocolo-passos li::before {
+    content: counter(passo, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-size: 14px;
+    font-weight: 700;
+    background: var(--verde-claro);
+    color: var(--verde-escuro);
+  }
+  .protocolo.protocolo-sala .protocolo-passos li::before {
+    background: #FAEEDA;
+    color: #854F0B;
+  }
+  .protocolo-passos strong { color: var(--grafite); font-weight: 600; }
+  .protocolo-chave {
+    margin-top: 22px;
+    padding: 14px 16px;
+    background: var(--creme-claro);
+    border-radius: 10px;
+    border-left: 3px solid var(--dourado);
+    font-size: 13px;
+    color: var(--cinza-texto);
+    line-height: 1.6;
+  }
+  .protocolo-chave strong { color: var(--verde-escuro); font-weight: 600; }
+
+  .faq { background: var(--creme-claro); border-radius: 16px; padding: 8px 20px; border: 1px solid var(--cinza-borda); }
+  .faq-item { border-bottom: 1px solid var(--cinza-borda); }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-pergunta { width: 100%; background: none; border: none; padding: 18px 0; font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--verde-escuro); text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; line-height: 1.5; }
+  .faq-pergunta:hover { color: var(--verde-medio); }
+  .faq-toggle { width: 28px; height: 28px; background: var(--verde-claro); color: var(--verde-escuro); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; font-weight: 700; transition: transform 0.3s; }
+  .faq-item.aberto .faq-toggle { transform: rotate(45deg); background: var(--verde-medio); color: white; }
+  .faq-resposta { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+  .faq-item.aberto .faq-resposta { max-height: 500px; }
+  .faq-resposta-inner { padding: 0 0 18px 0; font-size: 14px; color: var(--cinza-texto); line-height: 1.65; }
+  .faq-resposta-inner strong { color: var(--grafite); font-weight: 600; }
+  .emerg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .emerg-card { background: white; border-radius: 14px; padding: 24px; border: 1px solid var(--cinza-borda); border-left: 4px solid var(--vermelho-emerg); box-shadow: var(--shadow-sm); }
+  .emerg-card.escuta { border-left-color: var(--azul-das); }
+  .emerg-card.psico { border-left-color: var(--verde-medio); }
+  .emerg-titulo { font-family: var(--serif); font-size: 19px; font-weight: 600; color: var(--verde-escuro); margin-bottom: 6px; }
+  .emerg-tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; margin-bottom: 10px; }
+  .emerg-card.cvv .emerg-tag { background: #FCEBEB; color: var(--vermelho); }
+  .emerg-card.escuta .emerg-tag { background: #E5EDF8; color: var(--azul-das); }
+  .emerg-card.psico .emerg-tag { background: var(--verde-claro); color: var(--verde-escuro); }
+  .emerg-desc { font-size: 13px; color: var(--cinza-texto); line-height: 1.6; margin-bottom: 14px; }
+  .emerg-acao { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 100px; font-size: 13px; font-weight: 600; text-decoration: none; transition: transform 0.2s; }
+  .emerg-acao:hover { transform: translateY(-1px); }
+  .emerg-card.cvv .emerg-acao { background: var(--vermelho-emerg); color: white; }
+  .emerg-card.escuta .emerg-acao { background: var(--azul-das); color: white; }
+  .emerg-card.psico .emerg-acao { background: var(--verde-medio); color: white; }
+  .supervisao { background: var(--creme-claro); border-radius: 14px; padding: 24px; margin-bottom: 24px; border: 1px solid var(--cinza-borda); }
+  .supervisao-label { font-size: 11px; color: var(--dourado); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+  .supervisao-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .sup-card { display: flex; gap: 12px; align-items: center; }
+  .sup-icon { width: 44px; height: 44px; background: var(--verde-escuro); color: var(--dourado-claro); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-weight: 700; font-size: 16px; flex-shrink: 0; }
+  .sup-posto { font-size: 11px; color: var(--dourado); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+  .sup-nome { font-family: var(--serif); font-size: 16px; font-weight: 600; color: var(--verde-escuro); }
+  .responsaveis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .resp-card { background: white; border: 1px solid var(--cinza-borda); border-radius: 12px; padding: 20px; text-align: center; }
+  .resp-cia { font-size: 11px; color: var(--dourado); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .resp-nome { font-family: var(--serif); font-size: 18px; font-weight: 600; color: var(--verde-escuro); margin-bottom: 4px; }
+  .resp-papel { font-size: 12px; color: var(--cinza-texto); margin-bottom: 12px; }
+  .resp-zap { display: inline-flex; align-items: center; gap: 6px; background: var(--verde-claro); color: var(--verde-escuro); padding: 6px 12px; border-radius: 100px; font-size: 13px; text-decoration: none; font-weight: 500; transition: background 0.2s; }
+  .resp-zap:hover { background: var(--verde-medio); color: white; }
+  .resp-info { font-size: 12px; color: var(--cinza-texto); font-style: italic; padding: 6px 0; }
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 77, 63, 0.5); z-index: 1000; padding: 24px; overflow-y: auto; }
+  .modal-overlay.ativo { display: flex; align-items: flex-start; justify-content: center; }
+  .modal { background: var(--creme); max-width: 540px; width: 100%; border-radius: 20px; padding: 32px; box-shadow: var(--shadow-lg); margin: 24px auto; position: relative; }
+  .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--cinza-texto); width: 36px; height: 36px; border-radius: 50%; }
+  .modal-close:hover { background: var(--cinza-borda); }
+  .modal h2 { font-family: var(--serif); color: var(--verde-escuro); font-size: 24px; margin-bottom: 8px; }
+  .modal-sub { color: var(--cinza-texto); font-size: 14px; margin-bottom: 24px; }
+  .modal-tipo { display: flex; gap: 8px; margin-bottom: 20px; }
+  .modal-tipo-btn { flex: 1; padding: 10px; border: 1px solid var(--cinza-borda); background: white; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; font-family: var(--sans); color: var(--cinza-texto); }
+  .modal-tipo-btn.ativo { background: var(--verde-escuro); color: white; border-color: var(--verde-escuro); }
+  .form-grupo { margin-bottom: 16px; }
+  .form-grupo label { display: block; font-size: 13px; font-weight: 600; color: var(--grafite); margin-bottom: 6px; }
+  .form-grupo input, .form-grupo select, .form-grupo textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--cinza-borda); border-radius: 8px; font-family: var(--sans); font-size: 14px; background: white; color: var(--grafite); }
+  .form-grupo input:focus, .form-grupo select:focus, .form-grupo textarea:focus { outline: none; border-color: var(--verde-medio); box-shadow: 0 0 0 3px rgba(29, 110, 90, 0.1); }
+  .form-grupo textarea { min-height: 70px; resize: vertical; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .btn-enviar { width: 100%; background: var(--verde-escuro); color: var(--creme-claro); border: none; padding: 14px; border-radius: 10px; font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .btn-enviar:hover { background: var(--verde-medio); }
+  .info-box { background: var(--verde-claro); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--verde-escuro); margin-bottom: 16px; line-height: 1.5; }
+  footer { background: var(--verde-escuro); color: var(--creme-claro); text-align: center; padding: 32px 24px; font-size: 13px; }
+  footer .credits { opacity: 0.7; margin-top: 8px; font-size: 12px; }
+  footer .destaque { color: var(--dourado-claro); font-weight: 600; }
+  @media (max-width: 600px) {
+    .psicologo { grid-template-columns: 1fr; text-align: center; }
+    .psicologo-avatar { margin: 0 auto; }
+    .psicologo-pessoa { text-align: left; }
+    .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    .modal { padding: 24px; }
+    .agenda-header { flex-direction: column; align-items: flex-start; }
+    .agenda-nav { width: 100%; justify-content: space-between; }
+    .institucional-sigla { font-size: 22px; letter-spacing: 0.14em; }
+    .institucional-linha { gap: 12px; }
+    .protocolos-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="emerg-bar">
+  <span>🚨 <strong>Em crise agora?</strong></span>
+  <a href="tel:188">CVV 188</a>
+  <span>·</span>
+  <a href="#emergencia">Ver canais de apoio</a>
+</div>
+
+<header class="hero">
+  <!-- ============ TÍTULO INSTITUCIONAL TIPOGRÁFICO (v4.1) ============ -->
+  <div class="institucional" role="banner" aria-label="Polícia Militar de Pernambuco · Academia do Paudalho · Diretoria de Assistência Social">
+    <div class="institucional-linha">
+      <span class="institucional-sigla">PMPE</span>
+      <span class="institucional-sep">·</span>
+      <span class="institucional-sigla">APMP</span>
+      <span class="institucional-sep">·</span>
+      <span class="institucional-sigla">DAS</span>
+    </div>
+    <div class="institucional-base" aria-hidden="true"></div>
+    <div class="institucional-rodape">
+      Polícia Militar de Pernambuco &nbsp;·&nbsp; Academia do Paudalho &nbsp;·&nbsp; Diretoria de Assistência Social
+    </div>
+  </div>
+
+  <div class="hero-tag">Setor de Saúde Mental · APMP · DAS · PMPE</div>
+  <h1>Um momento para <em>se reconectar</em> com você mesmo.</h1>
+  <p>Atendimento psicológico individual oferecido pela Academia de Polícia Militar do Paudalho em parceria com a Diretoria de Assistência Social.</p>
+
+  <div class="hero-ctas">
+    <button class="btn-hero primario" onclick="abrirModal('terapia')">Agendar terapia <span>→</span></button>
+    <button class="btn-hero secundario" onclick="abrirModal('sala')">Reservar sala</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="section">
+    <span class="section-tag">Por que terapia</span>
+    <h2 class="section-title">A pausa que sustenta a missão.</h2>
+    <p class="section-lead">A formação de oficial exige firmeza, disciplina e resistência. Cuidar da saúde mental não é fraqueza — é manutenção. É preparar o instrumento mais importante que você leva pra qualquer operação: você mesmo.</p>
+
+    <div class="importancia">
+      <p>"A terapia é um espaço seguro para nomear o que aperta, organizar o que confunde e reencontrar o que importa."</p>
+      <p>Aqui, fora do ritmo da tropa, você pode falar sem julgamento, processar o peso do curso, dos plantões, da rotina militar — e voltar para a formatura mais inteiro. Buscar ajuda profissional é um ato de coragem e de comando sobre si.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-tag">Quebrando estigmas</span>
+    <h2 class="section-title">Mitos × Fatos.</h2>
+    <p class="section-lead">No meio militar circulam muitas crenças sobre buscar terapia. Vamos enfrentar de frente.</p>
+
+    <div class="mitos-grid">
+      <div class="mito-card">
+        <span class="mito-label mito">❌ Mito</span>
+        <div class="mito-frase tachada">"Terapia é coisa para quem não aguenta pressão."</div>
+        <span class="mito-label fato">✓ Fato</span>
+        <div class="mito-resposta">A pressão faz parte da formação, mas ninguém precisa lidar com ela sem preparo emocional. <strong>Terapia não elimina a exigência da rotina militar</strong> — ela ajuda o cadete a desenvolver mais equilíbrio, autocontrole e clareza para enfrentar essa rotina.</div>
+      </div>
+
+      <div class="mito-card">
+        <span class="mito-label mito">❌ Mito</span>
+        <div class="mito-frase tachada">"Se eu falar o que sinto, vão achar que sou fraco."</div>
+        <span class="mito-label fato">✓ Fato</span>
+        <div class="mito-resposta">Reconhecer o que sente exige maturidade. Quem aprende a <strong>nomear emoções</strong> também aprende a agir com mais controle diante de situações difíceis. No contexto militar, isso pode melhorar a tomada de decisão, a convivência e a liderança.</div>
+      </div>
+
+      <div class="mito-card">
+        <span class="mito-label mito">❌ Mito</span>
+        <div class="mito-frase tachada">"Psicólogo só serve para quem tem transtorno mental."</div>
+        <span class="mito-label fato">✓ Fato</span>
+        <div class="mito-resposta">A terapia também é <strong>preventiva</strong>. Ela pode ajudar em momentos de adaptação, estresse, conflitos, ansiedade, saudade da família, dificuldade para dormir, queda de rendimento ou dúvidas sobre a carreira.</div>
+      </div>
+
+      <div class="mito-card">
+        <span class="mito-label mito">❌ Mito</span>
+        <div class="mito-frase tachada">"O que eu falar na terapia vai chegar na hierarquia."</div>
+        <span class="mito-label fato">✓ Fato</span>
+        <div class="mito-resposta">O atendimento psicológico é <strong>protegido pelo sigilo profissional</strong>. O conteúdo das sessões não deve ser compartilhado com superiores, colegas ou instrutores. A terapia é um espaço reservado para cuidado, escuta e orientação profissional.</div>
+      </div>
+
+      <div class="mito-card">
+        <span class="mito-label mito">❌ Mito</span>
+        <div class="mito-frase tachada">"Quem faz terapia perde respeito dentro da tropa."</div>
+        <span class="mito-label fato">✓ Fato</span>
+        <div class="mito-resposta">Cuidar da saúde mental demonstra responsabilidade. Um profissional que reconhece seus limites, busca apoio e trabalha seu equilíbrio emocional tende a estar <strong>mais preparado para conviver, liderar e atuar sob pressão</strong>.</div>
+      </div>
+
+      <div class="mito-card">
+        <span class="mito-label mito">❌ Mito</span>
+        <div class="mito-frase tachada">"Eu consigo resolver tudo sozinho."</div>
+        <span class="mito-label fato">✓ Fato</span>
+        <div class="mito-resposta">Autonomia não significa isolamento. <strong>Pedir ajuda no momento certo é uma atitude inteligente e responsável</strong>. Assim como o preparo físico precisa de orientação, o preparo emocional também pode ser fortalecido com apoio profissional.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PSICÓLOGO (v4.1) — com nome e bio ============ -->
+  <section class="section">
+    <span class="section-tag">Quem te atende</span>
+    <h2 class="section-title">O psicólogo.</h2>
+
+    <div class="psicologo">
+      <div class="psicologo-avatar" aria-hidden="true">🧠</div>
+      <div>
+        <div class="psicologo-nome">Murilo</div>
+        <div class="psicologo-role">Núcleo de Saúde Mental · DAS · PMPE</div>
+
+        <div class="psicologo-bio">
+          <strong>Formação:</strong>
+          <ul>
+            <li>Graduação em Psicologia pela <strong>FACHO</strong> (Faculdade de Ciências Humanas de Olinda)</li>
+            <li>Pós-graduação em <strong>Terapia Cognitivo-Comportamental</strong> (TCC), também pela FACHO</li>
+          </ul>
+        </div>
+
+        <div class="psicologo-bio">
+          <strong>Vínculo institucional:</strong> Núcleo de Saúde Mental da PMPE / Diretoria de Assistência Social (DAS).
+        </div>
+
+        <!-- BLOCO PESSOAL — Lisandry vai completar -->
+        <div class="psicologo-pessoa">
+          <strong>Sobre o Murilo:</strong>
+          [Texto pessoal a ser preenchido — descreva quem ele é como pessoa, postura clínica, traços que humanizam o atendimento.]
+        </div>
+      </div>
+    </div>
+
+    <div class="sigilo-nota">
+      🔒 <strong>Sigilo profissional garantido.</strong> O conteúdo das sessões é estritamente confidencial entre você e o psicólogo, conforme o Código de Ética Profissional do Psicólogo (Conselho Federal de Psicologia — CFP).
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-tag">Disponibilidade</span>
+    <h2 class="section-title">Duas agendas, dois propósitos.</h2>
+    <p class="section-lead">A <strong>agenda do psicólogo</strong> tem horários fixos (terças e quintas, 40min). A <strong>agenda da sala</strong> permite reservar o espaço físico, hora a hora, para atendimento online com psicólogo particular — disponível 24 horas.</p>
+
+    <div class="agenda-tabs">
+      <button class="agenda-tab ativo" onclick="trocarAgenda('psico', this)">🧠 Sessões com psicólogo</button>
+      <button class="agenda-tab" onclick="trocarAgenda('sala', this)">🚪 Sala física</button>
+    </div>
+
+    <div class="agenda-conteudo ativo" id="agenda-psico">
+      <div class="agenda-header">
+        <div>
+          <div class="agenda-titulo">Sessões com o psicólogo</div>
+          <div class="agenda-sub">40 minutos · terças e quintas</div>
+        </div>
+        <div class="agenda-nav">
+          <button onclick="navegarSemana('psico', -1)">← Anterior</button>
+          <div class="agenda-nav-label" id="psicoSemanaLabel">—</div>
+          <button onclick="navegarSemana('psico', 1)">Próxima →</button>
+        </div>
+      </div>
+
+      <div class="agenda-info">
+        <span class="chip chip-livre"><span class="chip-dot"></span>Livre</span>
+        <span class="chip chip-pendente"><span class="chip-dot"></span>Pendente</span>
+        <span class="chip chip-ocupado"><span class="chip-dot"></span>Ocupado</span>
+      </div>
+
+      <div id="psicoAgendaContent"></div>
+    </div>
+
+    <div class="agenda-conteudo" id="agenda-sala">
+      <div class="agenda-header">
+        <div>
+          <div class="agenda-titulo">Reserva da Sala</div>
+          <div class="agenda-sub">Hora a hora · 24h · exclusivo para atendimento online com psicólogo particular</div>
+        </div>
+        <div class="agenda-nav">
+          <button onclick="navegarSemana('sala', -1)">← Anterior</button>
+          <div class="agenda-nav-label" id="salaSemanaLabel">—</div>
+          <button onclick="navegarSemana('sala', 1)">Próxima →</button>
+        </div>
+      </div>
+
+      <div class="agenda-info">
+        <span class="chip chip-livre"><span class="chip-dot"></span>Disponível</span>
+        <span class="chip chip-pendente"><span class="chip-dot"></span>Pendente</span>
+        <span class="chip chip-ocupado"><span class="chip-dot"></span>Reservada</span>
+      </div>
+
+      <div class="sala-tabela">
+        <div class="sala-tabela-wrap">
+          <table>
+            <thead><tr id="salaTabelaHead"></tr></thead>
+            <tbody id="salaTabelaBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROTOCOLOS EM 2 CARDS SEPARADOS (v4.1) ============ -->
+  <section class="section">
+    <span class="section-tag">Como funciona</span>
+    <h2 class="section-title">Protocolos da APMP.</h2>
+    <p class="section-lead">Dois fluxos distintos. <strong>Card A</strong>: sessão com o psicólogo da APMP. <strong>Card B</strong>: reserva da sala para atendimento online com psicólogo particular. Em ambos, a chave fica <em>na guarda</em>, com o efetivo da guarda, mediante registro.</p>
+
+    <div class="protocolos-grid">
+
+      <!-- CARD A: Sessão com psicólogo APMP -->
+      <div class="protocolo">
+        <span class="protocolo-tag">🧠 Card A · Sessão APMP</span>
+        <div class="protocolo-letra">Protocolo A</div>
+        <h3 class="protocolo-titulo">Sessão com o psicólogo da APMP</h3>
+        <p class="protocolo-desc">Quatro passos para a sessão presencial com Murilo, no horário marcado pela agenda do psicólogo (ter/qui · 40min).</p>
+
+        <ol class="protocolo-passos">
+          <li><strong>Informe ao seu Xerife.</strong> Comunique que você irá à sala da psicologia para atendimento no horário marcado.</li>
+          <li><strong>No dia da consulta.</strong> Informe ao Auxiliar/Adjunto da sua companhia sobre o atendimento, assim que possível.</li>
+          <li><strong>Acesso à sala.</strong> Verifique com o Auxiliar/Adjunto quem irá <strong>se armar com a chave na guarda</strong> — você ou ele.</li>
+          <li><strong>Conclusão da sessão.</strong> Após o atendimento, devolva a chave à guarda e dê retorno ao aluno responsável pela psicologia: se tudo correu bem ou se houve alguma alteração. É importante para podermos sempre melhorar.</li>
+        </ol>
+
+        <div class="protocolo-chave">
+          🔑 <strong>Chave:</strong> fica na guarda, com o efetivo da guarda, mediante registro.
+        </div>
+      </div>
+
+      <!-- CARD B: Reserva da sala -->
+      <div class="protocolo protocolo-sala">
+        <span class="protocolo-tag">🚪 Card B · Reserva da sala</span>
+        <div class="protocolo-letra">Protocolo B</div>
+        <h3 class="protocolo-titulo">Reserva da sala — atendimento online particular</h3>
+        <p class="protocolo-desc">Quatro passos para usar a sala física para sessão online com seu psicólogo particular, no horário reservado (24h · 1h).</p>
+
+        <ol class="protocolo-passos">
+          <li><strong>Confirme a reserva.</strong> Verifique previamente com o titular da sua CIA se a sala está disponível no horário desejado e aguarde a confirmação.</li>
+          <li><strong>No dia da sessão.</strong> Informe ao Auxiliar/Adjunto da sua companhia sobre o uso da sala, assim que possível.</li>
+          <li><strong>Acesso à sala.</strong> Verifique com o Auxiliar/Adjunto quem irá <strong>se armar com a chave na guarda</strong> — você ou ele.</li>
+          <li><strong>Conclusão do uso.</strong> Devolva a sala em ordem (como encontrou), entregue a chave à guarda e dê retorno ao aluno responsável pela psicologia.</li>
+        </ol>
+
+        <div class="protocolo-chave">
+          🔑 <strong>Chave:</strong> fica na guarda, com o efetivo da guarda, mediante registro.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-tag">Tirando dúvidas</span>
+    <h2 class="section-title">Perguntas frequentes.</h2>
+    <p class="section-lead">Tudo o que cadetes costumam perguntar antes de marcar a primeira sessão.</p>
+
+    <div class="faq">
+      <div class="faq-item">
+        <button class="faq-pergunta" onclick="toggleFaq(this)">
+          <span>Preciso estar em crise pra marcar?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-resposta"><div class="faq-resposta-inner">
+          Não. Você pode marcar simplesmente por estresse acumulado, dificuldade pra dormir, ansiedade, conflitos com a família, saudades de casa ou só pra desabafar. Terapia preventiva também é terapia.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-pergunta" onclick="toggleFaq(this)">
+          <span>O que eu falar vai parar nos meus chefes?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-resposta"><div class="faq-resposta-inner">
+          O conteúdo das sessões é <strong>protegido pelo sigilo profissional</strong>, conforme o Código de Ética Profissional do Psicólogo (Conselho Federal de Psicologia). O sigilo só pode ser quebrado em situações excepcionais previstas em lei (risco iminente de vida, por exemplo).
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-pergunta" onclick="toggleFaq(this)">
+          <span>Posso ir à sessão de TFM (traje físico-militar)?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-resposta"><div class="faq-resposta-inner">
+          Sim.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-pergunta" onclick="toggleFaq(this)">
+          <span>Se a sessão for em horário de aula, conta falta?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-resposta"><div class="faq-resposta-inner">
+          Depende da duração: <strong>até 50 minutos não conta falta.</strong> Se exceder, será contabilizada como falta na disciplina cujo horário foi afetado. Sempre guarde a <strong>declaração de comparecimento</strong> — pode ser útil em caso de necessidade.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-pergunta" onclick="toggleFaq(this)">
+          <span>E se a tropa estiver em forma quando eu sair da sessão?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-resposta"><div class="faq-resposta-inner">
+          Você fica <strong>dispensado da apresentação</strong> naquele momento — é possível aguardar a próxima formatura para se incorporar.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-pergunta" onclick="toggleFaq(this)">
+          <span>Quem fica sabendo que eu fiz terapia?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-resposta"><div class="faq-resposta-inner">
+          Operacionalmente: o titular do agendamento da sua CIA (para reservar a sala), o seu Xerife e o Auxiliar/Adjunto (para registrar a saída). Nenhum deles tem acesso ao conteúdo da sessão — só sabem que você foi à sala da psicologia, da mesma forma que saberiam se você fosse ao médico ou ao dentista.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-pergunta" onclick="toggleFaq(this)">
+          <span>E se eu não me sentir à vontade com o psicólogo?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-resposta"><div class="faq-resposta-inner">
+          A conexão paciente-terapeuta é fundamental para a terapia funcionar. Se você não se sentir à vontade, pode buscar atendimento pelo <strong>Escuta SUSP</strong> (atendimento online, gratuito, com psicólogos de fora da corporação) ou serviço particular. Ver a seção "Em crise ou precisando de apoio" abaixo.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-pergunta" onclick="toggleFaq(this)">
+          <span>A sala pode ser usada para outras finalidades?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-resposta"><div class="faq-resposta-inner">
+          A reserva da sala é <strong>exclusiva para atendimento online com psicólogo particular</strong>. A disponibilidade é 24 horas justamente para acomodar emergências e os horários flexíveis dos psicólogos particulares de cada cadete.
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="emergencia">
+    <span class="section-tag">Apoio imediato</span>
+    <h2 class="section-title">Em crise ou precisando de apoio.</h2>
+    <p class="section-lead">Se você está em sofrimento intenso, busque ajuda agora. Existem 3 canais diretos:</p>
+
+    <div class="emerg-grid">
+      <div class="emerg-card cvv">
+        <span class="emerg-tag">24h · gratuito</span>
+        <div class="emerg-titulo">CVV — Centro de Valorização da Vida</div>
+        <p class="emerg-desc">Acolhimento emocional anônimo e sigiloso, todos os dias do ano. Ligação gratuita pelo telefone <strong>188</strong>. Também atende por chat e e-mail.</p>
+        <a href="tel:188" class="emerg-acao">📞 Ligar 188</a>
+      </div>
+
+      <div class="emerg-card escuta">
+        <span class="emerg-tag">Online · gratuito</span>
+        <div class="emerg-titulo">Escuta SUSP</div>
+        <p class="emerg-desc">Atendimento psicológico <strong>online, sigiloso e gratuito</strong> exclusivo para profissionais da segurança pública. Pernambuco já está incluído. Coordenado pela UFMG, com psicólogos capacitados em segurança pública e fora da corporação — sem o peso da hierarquia.</p>
+        <a href="https://www.gov.br/mj/pt-br/assuntos/sua-seguranca/seguranca-publica/escuta-susp" target="_blank" rel="noopener" class="emerg-acao">🌐 Acessar site</a>
+      </div>
+
+      <div class="emerg-card psico">
+        <span class="emerg-tag">APMP</span>
+        <div class="emerg-titulo">Psicólogo da APMP</div>
+        <p class="emerg-desc">Atendimento aqui mesmo na academia, com agendamento via responsáveis. Se precisar de urgência fora dos horários regulares, comunique ao titular da sua CIA.</p>
+        <a href="#" onclick="abrirModal('terapia');return false;" class="emerg-acao">🧠 Agendar sessão</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-tag">Estrutura</span>
+    <h2 class="section-title">Quem coordena.</h2>
+
+    <div class="supervisao">
+      <div class="supervisao-label">Supervisão hierárquica</div>
+      <div class="supervisao-grid">
+        <div class="sup-card">
+          <div class="sup-icon">RV</div>
+          <div>
+            <div class="sup-posto">1º Tenente</div>
+            <div class="sup-nome">Ruan Vicente</div>
+          </div>
+        </div>
+        <div class="sup-card">
+          <div class="sup-icon">PL</div>
+          <div>
+            <div class="sup-posto">2º Tenente</div>
+            <div class="sup-nome">Pedro Lima</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-lead" style="margin-top: 24px;">Cada Companhia tem seu titular para organização das demandas. Em caso de dúvida ou indisponibilidade, recorra ao apoio.</p>
+
+    <div class="responsaveis-grid">
+      <div class="resp-card">
+        <div class="resp-cia">1ª CIA</div>
+        <div class="resp-nome">Julio</div>
+        <div class="resp-papel">Titular · 1ª CIA</div>
+        <div class="resp-info">Referência interna</div>
+      </div>
+      <div class="resp-card">
+        <div class="resp-cia">2ª CIA</div>
+        <div class="resp-nome">Lisandry</div>
+        <div class="resp-papel">Titular · 1º PEL / 2ª CIA · AL 108</div>
+        <a href="https://wa.me/5581989047832" target="_blank" rel="noopener" class="resp-zap">📱 WhatsApp</a>
+      </div>
+      <div class="resp-card">
+        <div class="resp-cia">2ª CIA</div>
+        <div class="resp-nome">Hugo</div>
+        <div class="resp-papel">Titular · 1º PEL / 2ª CIA · AL 153</div>
+        <a href="https://wa.me/5582982343707" target="_blank" rel="noopener" class="resp-zap">📱 WhatsApp</a>
+      </div>
+      <div class="resp-card">
+        <div class="resp-cia">Apoio</div>
+        <div class="resp-nome">Kevin Gomes</div>
+        <div class="resp-papel">Apoio · 1º PEL / 2ª CIA · AL 165</div>
+        <a href="https://wa.me/5581984814995" target="_blank" rel="noopener" class="resp-zap">📱 WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div>Setor de Agendamento · Núcleo de Saúde Mental · <span class="destaque">APMP — CFO PM 2026</span></div>
+  <div class="credits">Sistema desenvolvido por <span class="destaque">AL CFO PM 108 Lisandry</span> · 1º PEL / 2ª CIA</div>
+</footer>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="fecharModal()">×</button>
+    <h2 id="modalTitulo">Solicitar agendamento</h2>
+    <p class="modal-sub" id="modalSub">Preencha os dados abaixo.</p>
+
+    <div class="modal-tipo">
+      <button class="modal-tipo-btn ativo" id="tipoBtnTerapia" onclick="mudarTipo('terapia')">🧠 Terapia</button>
+      <button class="modal-tipo-btn" id="tipoBtnSala" onclick="mudarTipo('sala')">🚪 Sala</button>
+    </div>
+
+    <div class="info-box">
+      ℹ Sua solicitação só será considerada após confirmação do titular. Você receberá retorno no seu WhatsApp.
+    </div>
+
+    <form id="formAgendamento" onsubmit="enviarSolicitacao(event)">
+      <div class="form-grupo">
+        <label for="nomeGuerra">Nome de guerra *</label>
+        <input type="text" id="nomeGuerra" required placeholder="Ex.: Silva, Lisandry, Gomes…">
+      </div>
+
+      <div class="form-row-3">
+        <div class="form-grupo">
+          <label for="al">AL nº *</label>
+          <input type="text" id="al" required placeholder="108">
+        </div>
+        <div class="form-grupo">
+          <label for="pel">PEL *</label>
+          <select id="pel" required>
+            <option value="">—</option>
+            <option value="1º">1º</option>
+            <option value="2º">2º</option>
+            <option value="3º">3º</option>
+            <option value="4º">4º</option>
+            <option value="5º">5º</option>
+            <option value="6º">6º</option>
+          </select>
+        </div>
+        <div class="form-grupo">
+          <label for="cia">CIA *</label>
+          <select id="cia" required>
+            <option value="">—</option>
+            <option value="1">1ª</option>
+            <option value="2">2ª</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grupo">
+        <label for="zapAluno">Seu WhatsApp (com DDD) *</label>
+        <input type="tel" id="zapAluno" required placeholder="Ex.: 81 989047832">
+      </div>
+
+      <div id="campos-terapia">
+        <div class="form-row">
+          <div class="form-grupo">
+            <label for="dataTerapia">Data *</label>
+            <select id="dataTerapia"></select>
+          </div>
+          <div class="form-grupo">
+            <label for="horario">Horário *</label>
+            <select id="horario">
+              <option value="">—</option>
+              <option value="08:00 às 08:40">08:00 às 08:40</option>
+              <option value="09:00 às 09:40">09:00 às 09:40</option>
+              <option value="10:00 às 10:40">10:00 às 10:40</option>
+              <option value="11:00 às 11:40">11:00 às 11:40</option>
+              <option value="13:00 às 13:40">13:00 às 13:40</option>
+              <option value="14:00 às 14:40">14:00 às 14:40</option>
+              <option value="15:00 às 15:40">15:00 às 15:40</option>
+              <option value="16:00 às 16:40">16:00 às 16:40</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="campos-sala" style="display:none;">
+        <div class="form-row">
+          <div class="form-grupo">
+            <label for="dataSala">Data *</label>
+            <input type="date" id="dataSala">
+          </div>
+          <div class="form-grupo">
+            <label for="horarioSala">Horário (1 hora) *</label>
+            <select id="horarioSala"><option value="">—</option></select>
+          </div>
+        </div>
+        <div class="info-box" style="background: #FAEEDA; color: #854F0B;">
+          📌 A sala é <strong>exclusiva para atendimento online com psicólogo particular</strong>.
+        </div>
+      </div>
+
+      <div class="form-grupo">
+        <label for="observacao">Observação (opcional)</label>
+        <textarea id="observacao" placeholder="Algo importante que o titular deva saber?"></textarea>
+      </div>
+
+      <button type="submit" class="btn-enviar" id="btnEnviar">Solicitar agendamento →</button>
+    </form>
+  </div>
+</div>
+
+<!-- Toast de feedback -->
+<div id="toast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--verde-escuro);color:white;padding:14px 24px;border-radius:10px;z-index:9999;font-weight:600;font-size:14px;box-shadow:var(--shadow-lg);max-width:90vw;text-align:center;"></div>
+
+<script>
+  let tipoAtual = 'terapia';
+  let semanaOffsetPsico = 0;
+  let semanaOffsetSala = 0;
+
+  const DIAS_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+  // ── Utilitários de data ──────────────────────────────────────────────────
+  function getInicioSemana(offset = 0) {
+    const hoje = new Date();
+    const diff = hoje.getDay() === 0 ? -6 : 1 - hoje.getDay();
+    const seg = new Date(hoje);
+    seg.setDate(hoje.getDate() + diff + offset * 7);
+    seg.setHours(0, 0, 0, 0);
+    return seg;
+  }
+  function formatarData(d) { return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`; }
+  function formatarDataCompleta(d) { return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
+  function isoDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+  function mostrarToast(msg, erro = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = erro ? 'var(--vermelho)' : 'var(--verde-escuro)';
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 5000);
+  }
+
+  // ── API helper ───────────────────────────────────────────────────────────
+  async function api(path, opts = {}) {
+    const resp = await fetch(path, opts);
+    const json = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(json.erro || 'Erro desconhecido');
+    return json;
+  }
+
+  // ── Agenda do Psicólogo ──────────────────────────────────────────────────
+  async function renderPsico() {
+    const segunda = getInicioSemana(semanaOffsetPsico);
+    const terca   = new Date(segunda); terca.setDate(segunda.getDate() + 1);
+    const quinta  = new Date(segunda); quinta.setDate(segunda.getDate() + 3);
+    const domingo = new Date(segunda); domingo.setDate(segunda.getDate() + 6);
+
+    document.getElementById('psicoSemanaLabel').textContent = `${formatarData(segunda)} – ${formatarData(domingo)}`;
+    document.getElementById('psicoAgendaContent').innerHTML = '<p style="color:var(--cinza-texto);padding:16px 0">Carregando...</p>';
+
+    let dados = {};
+    try {
+      const r = await api(`/api/agenda/psico?inicio=${isoDate(segunda)}`);
+      dados = r.data || {};
+    } catch { /* exibe tudo como livre em caso de falha */ }
+
+    const horarios = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
+    let html = '';
+    [terca, quinta].forEach(data => {
+      const nomeDia = DIAS_PT[data.getDay()];
+      const dataIso = isoDate(data);
+      html += `<div class="dia-bloco"><div class="dia-titulo">${nomeDia} <span class="data">${formatarData(data)}</span></div><div class="horarios-grid">`;
+      horarios.forEach(h => {
+        const slot = dados[`${dataIso}-${h}`] || {};
+        const status = typeof slot === 'string' ? slot : (slot.status || 'livre');
+        const labelStatus = { livre: 'Livre', pendente: 'Pendente', indisponivel: 'Ocupado', aprovado: 'Ocupado' }[status] || 'Ocupado';
+        const classeStatus = (status === 'aprovado' || status === 'indisponivel') ? 'indisponivel' : status;
+        const onclick = status === 'livre' ? `onclick="selecionarTerapiaCalendario('${dataIso}','${h}')"` : '';
+        html += `<div class="horario ${classeStatus}" ${onclick}><div class="horario-hora">${h}</div><div class="horario-status">● ${labelStatus}</div></div>`;
+      });
+      html += `</div></div>`;
+    });
+    document.getElementById('psicoAgendaContent').innerHTML = html;
+  }
+
+  function selecionarTerapiaCalendario(dataIso, hora) {
+    abrirModal('terapia');
+    document.getElementById('dataTerapia').value = dataIso;
+    const fim = hora.split(':')[0].padStart(2,'0') + ':40';
+    const valorCompleto = `${hora} às ${fim}`;
+    const sel = document.getElementById('horario');
+    for (const opt of sel.options) { if (opt.value === valorCompleto) { sel.value = valorCompleto; break; } }
+  }
+
+  // ── Agenda da Sala ───────────────────────────────────────────────────────
+  async function renderSala() {
+    const segunda = getInicioSemana(semanaOffsetSala);
+    const dias    = Array.from({ length: 7 }, (_, i) => { const d = new Date(segunda); d.setDate(segunda.getDate() + i); return d; });
+    const ultimo  = dias[6];
+
+    document.getElementById('salaSemanaLabel').textContent = `${formatarData(segunda)} – ${formatarData(ultimo)}`;
+
+    document.getElementById('salaTabelaHead').innerHTML = '<th>Hora</th>' + dias.map(d =>
+      `<th>${DIAS_PT[d.getDay()].slice(0,3)}<span class="data-curta">${formatarData(d)}</span></th>`
+    ).join('');
+
+    let dados = {};
+    try {
+      const r = await api(`/api/agenda/sala?inicio=${isoDate(segunda)}`);
+      dados = r.data || {};
+    } catch { /* exibe tudo como livre */ }
+
+    let html = '';
+    for (let h = 0; h < 24; h++) {
+      html += `<tr><td>${String(h).padStart(2,'0')}:00</td>`;
+      dias.forEach(data => {
+        const dataIso = isoDate(data);
+        const slot = dados[`${dataIso}-${h}`] || {};
+        let classe = 'livre', texto = '';
+        const st = slot.status || 'livre';
+        if (st === 'ocupado' || st === 'aprovado') { classe = 'ocupado'; texto = slot.aluno || '✕'; }
+        else if (st === 'pendente') { classe = 'pendente'; texto = slot.aluno || '⏳'; }
+        else if (st === 'indisponivel') { classe = 'indisponivel'; texto = '—'; }
+        const onclick = classe === 'livre' ? `onclick="selecionarSalaCalendario('${dataIso}',${h})"` : '';
+        html += `<td><div class="sala-slot ${classe}" ${onclick}>${texto}</div></td>`;
+      });
+      html += '</tr>';
+    }
+    document.getElementById('salaTabelaBody').innerHTML = html;
+  }
+
+  function selecionarSalaCalendario(dataIso, hora) {
+    abrirModal('sala');
+    document.getElementById('dataSala').value = dataIso;
+    preencherHorariosSala();
+    document.getElementById('horarioSala').value = `${String(hora).padStart(2,'0')}:00 às ${String((hora+1)%24).padStart(2,'00')}:00`;
+  }
+
+  function preencherHorariosSala() {
+    const sel = document.getElementById('horarioSala');
+    let opts = '<option value="">—</option>';
+    for (let h = 0; h < 24; h++) {
+      const label = `${String(h).padStart(2,'0')}:00 às ${String((h+1)%24).padStart(2,'00')}:00`;
+      opts += `<option value="${label}">${label}</option>`;
+    }
+    sel.innerHTML = opts;
+  }
+
+  function navegarSemana(qual, delta) {
+    if (qual === 'psico') { semanaOffsetPsico = Math.max(0, semanaOffsetPsico + delta); renderPsico(); }
+    else { semanaOffsetSala = Math.max(0, semanaOffsetSala + delta); renderSala(); }
+  }
+
+  function trocarAgenda(qual, btn) {
+    document.querySelectorAll('.agenda-tab').forEach(t => t.classList.remove('ativo'));
+    document.querySelectorAll('.agenda-conteudo').forEach(t => t.classList.remove('ativo'));
+    btn.classList.add('ativo');
+    document.getElementById('agenda-' + qual).classList.add('ativo');
+  }
+
+  // ── Modal ────────────────────────────────────────────────────────────────
+  function toggleFaq(btn) { btn.parentElement.classList.toggle('aberto'); }
+
+  function abrirModal(tipo) {
+    mudarTipo(tipo || 'terapia');
+    preencherDatasTerapia();
+    preencherHorariosSala();
+    document.getElementById('modal').classList.add('ativo');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function fecharModal() {
+    document.getElementById('modal').classList.remove('ativo');
+    document.body.style.overflow = '';
+  }
+
+  function mudarTipo(tipo) {
+    tipoAtual = tipo;
+    document.getElementById('tipoBtnTerapia').classList.toggle('ativo', tipo === 'terapia');
+    document.getElementById('tipoBtnSala').classList.toggle('ativo', tipo === 'sala');
+    document.getElementById('campos-terapia').style.display = tipo === 'terapia' ? 'block' : 'none';
+    document.getElementById('campos-sala').style.display = tipo === 'sala' ? 'block' : 'none';
+
+    if (tipo === 'terapia') {
+      document.getElementById('modalTitulo').textContent = 'Agendar terapia';
+      document.getElementById('modalSub').textContent = 'Sessão individual com o psicólogo · 40 min.';
+      document.getElementById('dataTerapia').required = true;
+      document.getElementById('horario').required = true;
+      document.getElementById('dataSala').required = false;
+      document.getElementById('horarioSala').required = false;
+    } else {
+      document.getElementById('modalTitulo').textContent = 'Reservar sala';
+      document.getElementById('modalSub').textContent = 'Sala física · 1h · atendimento online com psicólogo particular.';
+      document.getElementById('dataTerapia').required = false;
+      document.getElementById('horario').required = false;
+      document.getElementById('dataSala').required = true;
+      document.getElementById('horarioSala').required = true;
+    }
+  }
+
+  function preencherDatasTerapia() {
+    const datas = [];
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    for (let i = 0; i < 60 && datas.length < 8; i++) {
+      const d = new Date(hoje); d.setDate(hoje.getDate() + i);
+      if (d.getDay() === 2 || d.getDay() === 4) datas.push(d);
+    }
+    const sel = document.getElementById('dataTerapia');
+    sel.innerHTML = '<option value="">—</option>' + datas.map(d =>
+      `<option value="${isoDate(d)}">${DIAS_PT[d.getDay()]}, ${formatarData(d)}</option>`
+    ).join('');
+  }
+
+  // ── Envio via API ────────────────────────────────────────────────────────
+  async function enviarSolicitacao(e) {
+    e.preventDefault();
+    const nomeGuerra = document.getElementById('nomeGuerra').value.trim();
+    const al         = document.getElementById('al').value.trim();
+    const pel        = document.getElementById('pel').value;
+    const cia        = document.getElementById('cia').value;
+    const zapAluno   = document.getElementById('zapAluno').value.replace(/\D/g, '');
+    const observacao = document.getElementById('observacao').value.trim();
+
+    let dataIso, dataFormatada, horario, horarioSala;
+
+    if (tipoAtual === 'terapia') {
+      dataIso = document.getElementById('dataTerapia').value;
+      horario = document.getElementById('horario').value;
+      if (!dataIso || !horario) { alert('Selecione data e horário.'); return; }
+      const d = new Date(dataIso + 'T00:00:00');
+      dataFormatada = `${DIAS_PT[d.getDay()]}, ${formatarDataCompleta(d)}`;
+    } else {
+      dataIso = document.getElementById('dataSala').value;
+      horarioSala = document.getElementById('horarioSala').value;
+      if (!dataIso || !horarioSala) { alert('Selecione data e horário.'); return; }
+      const d = new Date(dataIso + 'T00:00:00');
+      dataFormatada = `${DIAS_PT[d.getDay()]}, ${formatarDataCompleta(d)}`;
+    }
+
+    const btn = document.getElementById('btnEnviar');
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+
+    try {
+      await api('/api/agendamentos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: tipoAtual, nomeGuerra, al, pel, cia, zap: zapAluno, observacao, dataIso, dataFormatada, horario, horarioSala })
+      });
+
+      fecharModal();
+      document.getElementById('formAgendamento').reset();
+      mostrarToast('✓ Solicitação enviada! Aguarde confirmação no seu WhatsApp.');
+      renderPsico();
+      renderSala();
+    } catch (err) {
+      mostrarToast('Erro ao enviar: ' + err.message, true);
+    } finally {
+      btn.textContent = 'Solicitar agendamento →';
+      btn.disabled = false;
+    }
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  renderPsico();
+  renderSala();
+  preencherDatasTerapia();
+  preencherHorariosSala();
+
+  document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') fecharModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModal(); });
+</script>
+
+</body>
+</html>
