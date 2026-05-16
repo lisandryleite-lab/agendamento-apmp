@@ -8,13 +8,15 @@ const schema = new mongoose.Schema({
   cia:           { type: String, required: true },
   zap:           { type: String, trim: true },
   observacao:    { type: String, trim: true },
-  status:        { type: String, enum: ['pendente', 'aprovado', 'rejeitado'], default: 'pendente' },
+  status:        { type: String, enum: ['pendente', 'aprovado', 'rejeitado', 'nao_compareceu', 'cancelado'], default: 'pendente' },
   dataIso:       String,
   dataFormatada: String,
   horario:       String,
   horarioSala:   String,
   criadoEm:      { type: Date, default: Date.now },
-  decididoEm:    Date
+  decididoEm:    Date,
+  avisado:       { type: Boolean, default: false },
+  avisadoEm:     Date
 });
 
 schema.index({ status: 1, criadoEm: -1 });

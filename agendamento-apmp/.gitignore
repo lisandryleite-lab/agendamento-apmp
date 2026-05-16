@@ -1,1 +1,6 @@
 .vercel
+node_modules/
+.env
+baileys-session/
+bot-whatsapp.log
+*.log
