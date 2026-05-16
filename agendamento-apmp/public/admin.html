@@ -90,6 +90,12 @@
   .badge-pendente { background: #FAEEDA; color: #854F0B; }
   .badge-aprovado { background: #E1F5EE; color: var(--verde-escuro); }
   .badge-rejeitado { background: #FCEBEB; color: var(--vermelho); }
+  .badge-nao_compareceu { background: #F0E8D9; color: #854F0B; }
+  .badge-cancelado { background: #F0E0E0; color: #7A1F1F; }
+  .btn-nao-comp { background: var(--amarelo); color: white; }
+  .btn-cancelar-ag { background: #7A1F1F; color: white; }
+  .hist-semana { font-family: var(--serif); font-size: 14px; font-weight: 600; color: var(--verde-escuro); margin: 20px 0 8px; padding-bottom: 6px; border-bottom: 2px solid var(--verde-claro); }
+  .hist-semana:first-child { margin-top: 0; }
 
   .vazio { text-align: center; padding: 48px 24px; color: var(--cinza-texto); background: white; border-radius: 14px; border: 1px dashed var(--cinza-borda); }
   .vazio-icon { font-size: 32px; margin-bottom: 8px; opacity: 0.5; }
@@ -168,8 +174,7 @@
       </div>
     </div>
     <div class="topbar-acoes">
-      <button class="btn-topbar" onclick="exportarDados()">↓ Exportar</button>
-      <button class="btn-topbar" onclick="importarDados()">↑ Importar</button>
+      <button class="btn-topbar" onclick="imprimirAgendaDia()">🖨 Agenda do Dia</button>
       <button class="btn-topbar danger" onclick="sair()">Sair</button>
     </div>
   </div>
@@ -508,6 +513,8 @@
           ${p.zap ? `<button class="btn btn-zap" onclick="aprovarComZapFallback('${id}','${escape(p.zap)}')">Zap manual ↗</button>` : ''}
           <button class="btn btn-aprovar" onclick="aprovarPedido('${id}')">✓ Aprovar</button>
           <button class="btn btn-rejeitar" onclick="rejeitarPedido('${id}')">✕ Rejeitar</button>
+          <button class="btn btn-nao-comp" onclick="naoCompareceu('${id}')">Não compareceu</button>
+          <button class="btn btn-cancelar-ag" onclick="cancelarPedido('${id}')">Cancelar</button>
         </div>
       </div>`;
     }).join('');
@@ -584,22 +591,54 @@
     else { semanaOffsetSala += delta; renderSala(); }
   }
 
-  // ── Histórico ────────────────────────────────────────────────────────────
+  // ── Histórico (agrupado por semana) ─────────────────────────────────────
   function renderHistorico(pedidos) {
     const lista = document.getElementById('listaHistorico');
     if (!pedidos.length) { lista.innerHTML = '<div class="vazio">Nenhum histórico ainda.</div>'; return; }
-    lista.innerHTML = pedidos.sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)).map(p => {
-      const tipo = p.tipo || 'terapia';
-      const icone = tipo === 'terapia' ? '🧠' : '🚪';
-      const badgeClass = p.status === 'aprovado' ? 'badge-aprovado' : 'badge-rejeitado';
-      const badgeText  = p.status === 'aprovado' ? 'Aprovado' : 'Rejeitado';
-      const horarioInfo = tipo === 'terapia' ? `${p.dataFormatada || ''} ${p.horario || ''}` : `${p.dataFormatada || ''} ${p.horarioSala || ''}`;
-      return `<div class="hist-item">
-        <div>${icone} <strong>${escape(p.nomeGuerra || '')}</strong> · AL ${escape(p.al)} · ${escape(horarioInfo)}
-        <br><small>${formatarDataHora(p.criadoEm)}</small></div>
-        <span class="badge ${badgeClass}">${badgeText}</span>
-      </div>`;
-    }).join('');
+
+    const sorted = pedidos.sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm));
+
+    const grupos = {};
+    sorted.forEach(p => {
+      const d = new Date(p.criadoEm);
+      const diff = d.getDay() === 0 ? -6 : 1 - d.getDay();
+      const seg = new Date(d); seg.setDate(d.getDate() + diff); seg.setHours(0,0,0,0);
+      const key = isoDate(seg);
+      if (!grupos[key]) grupos[key] = { seg, itens: [] };
+      grupos[key].itens.push(p);
+    });
+
+    const badgeMap = {
+      aprovado: ['badge-aprovado', 'Aprovado'],
+      rejeitado: ['badge-rejeitado', 'Rejeitado'],
+      nao_compareceu: ['badge-nao_compareceu', 'Não compareceu'],
+      cancelado: ['badge-cancelado', 'Cancelado']
+    };
+
+    let html = '';
+    Object.keys(grupos).sort((a, b) => b.localeCompare(a)).forEach(key => {
+      const { seg, itens } = grupos[key];
+      const fim = new Date(seg); fim.setDate(seg.getDate() + 6);
+      html += `<div class="hist-semana">Semana de ${formatarData(seg)} a ${formatarData(fim)}</div>`;
+      html += itens.map(p => {
+        const tipo = p.tipo || 'terapia';
+        const icone = tipo === 'terapia' ? '🧠' : '🚪';
+        const [badgeClass, badgeText] = badgeMap[p.status] || ['badge-rejeitado', p.status];
+        const horarioInfo = tipo === 'terapia' ? `${p.dataFormatada || ''} ${p.horario || ''}` : `${p.dataFormatada || ''} ${p.horarioSala || ''}`;
+        const btnDeclaracao = p.status === 'aprovado'
+          ? `<button class="btn" style="background:var(--dourado);color:white;font-size:11px;" onclick="gerarDeclaracao(${JSON.stringify(JSON.stringify(p))})">📄 Declaração PDF</button>`
+          : '';
+        return `<div class="hist-item">
+          <div>${icone} <strong>${escape(p.nomeGuerra || '')}</strong> · AL ${escape(p.al)} · ${escape(horarioInfo)}
+          <br><small>${formatarDataHora(p.criadoEm)}</small></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            ${btnDeclaracao}
+            <span class="badge ${badgeClass}">${badgeText}</span>
+          </div>
+        </div>`;
+      }).join('');
+    });
+    lista.innerHTML = html;
   }
 
   // ── Ações sobre pedidos ──────────────────────────────────────────────────
@@ -616,6 +655,125 @@
       await api(`/api/agendamentos/${id}`, { method: 'PATCH', body: JSON.stringify({ status: 'rejeitado' }) });
       renderTudo();
     } catch (err) { alert('Erro: ' + err.message); }
+  }
+
+  async function naoCompareceu(id) {
+    if (!confirm('Marcar como "Não compareceu"?')) return;
+    try {
+      await api(`/api/agendamentos/${id}`, { method: 'PATCH', body: JSON.stringify({ status: 'nao_compareceu', enviarZap: false }) });
+      renderTudo();
+    } catch (err) { alert('Erro: ' + err.message); }
+  }
+
+  async function cancelarPedido(id) {
+    if (!confirm('Cancelar este agendamento?')) return;
+    try {
+      await api(`/api/agendamentos/${id}`, { method: 'PATCH', body: JSON.stringify({ status: 'cancelado', enviarZap: false }) });
+      renderTudo();
+    } catch (err) { alert('Erro: ' + err.message); }
+  }
+
+  function gerarDeclaracao(jsonStr) {
+    const p = JSON.parse(jsonStr);
+    const tipo = p.tipo === 'terapia' ? 'atendimento psicológico' : 'uso da sala de psicologia';
+    const horarioInfo = p.tipo === 'terapia' ? (p.horario || '') : (p.horarioSala || '');
+    const dataAtual = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+    const html = `<!DOCTYPE html><html lang="pt-BR"><head>
+<meta charset="UTF-8"><title>Declaração — ${p.nomeGuerra}</title>
+<style>
+  body{font-family:Arial,sans-serif;max-width:600px;margin:60px auto;padding:40px;color:#222;line-height:1.7;}
+  .header{text-align:center;margin-bottom:40px;border-bottom:2px solid #0F4D3F;padding-bottom:20px;}
+  .header h1{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#0F4D3F;margin:0;}
+  h2{font-size:17px;text-align:center;margin:30px 0;text-transform:uppercase;letter-spacing:1px;}
+  .corpo{margin:30px 0;text-align:justify;}
+  .assinatura{margin-top:70px;text-align:center;}
+  .linha{border-top:1px solid #222;width:280px;margin:0 auto 8px;}
+  .btn-print{margin-top:30px;padding:10px 20px;background:#0F4D3F;color:white;border:none;cursor:pointer;font-size:14px;border-radius:6px;}
+  @media print{.btn-print{display:none;}}
+</style></head><body>
+<div class="header"><h1>PMPE &nbsp;·&nbsp; APMP &nbsp;·&nbsp; DAS — Núcleo de Saúde Mental</h1></div>
+<h2>Declaração de Comparecimento</h2>
+<div class="corpo">
+  <p>Declaramos, para os devidos fins, que o(a) cadete <strong>${p.nomeGuerra}</strong>, AL&nbsp;${p.al}, ${p.pel}&nbsp;PEL&nbsp;/&nbsp;${p.cia}ª&nbsp;CIA, compareceu ao ${tipo} em <strong>${p.dataFormatada || '—'}</strong>${horarioInfo ? ` às ${horarioInfo}` : ''}.</p>
+  <p style="margin-top:16px;">Este documento é expedido pela equipe do Setor de Psicologia da Academia de Polícia Militar do Paudalho (APMP), vinculada à Diretoria de Assistência Social (DAS) da Polícia Militar de Pernambuco (PMPE).</p>
+</div>
+<div class="assinatura">
+  <p>Paudalho, ${dataAtual}</p>
+  <div class="linha" style="margin-top:50px;"></div>
+  <p><strong>Murilo</strong><br><small>Psicólogo — Núcleo de Saúde Mental · DAS · PMPE</small></p>
+</div>
+<button class="btn-print" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
+</body></html>`;
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+  }
+
+  function imprimirAgendaDia() {
+    const hoje = new Date();
+    const dataStr = isoDate(hoje);
+    const diaNome = DIAS_PT[hoje.getDay()];
+    const dataFormatada = `${String(hoje.getDate()).padStart(2,'0')}/${String(hoje.getMonth()+1).padStart(2,'0')}/${hoje.getFullYear()}`;
+
+    Promise.all([
+      api(`/api/agenda/psico?inicio=${dataStr}`).catch(() => ({ data: {} })),
+      api(`/api/agenda/sala?inicio=${dataStr}`).catch(() => ({ data: {} })),
+      api('/api/agendamentos').catch(() => ({ data: [] }))
+    ]).then(([rPsico, rSala, rAgs]) => {
+      const dadosPsico = rPsico.data || {};
+      const dadosSala  = rSala.data || {};
+      const agendamentos = (rAgs.data || []).filter(p => p.dataIso === dataStr && p.status === 'aprovado');
+
+      const ehTercaOuQuinta = hoje.getDay() === 2 || hoje.getDay() === 4;
+      const HORARIOS = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'];
+
+      let psicoHtml = '';
+      if (ehTercaOuQuinta) {
+        HORARIOS.forEach(h => {
+          const slot = dadosPsico[`${dataStr}-${h}`] || {};
+          const status = slot.status || 'livre';
+          const nome = slot.aluno || (status === 'livre' ? 'Livre' : status);
+          psicoHtml += `<tr><td>${h}</td><td>${nome}</td></tr>`;
+        });
+      } else {
+        psicoHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem atendimento hoje (ter/qui)</td></tr>';
+      }
+
+      let salaHtml = '';
+      for (let h = 0; h < 24; h++) {
+        const slot = dadosSala[`${dataStr}-${h}`] || {};
+        if (slot.status && slot.status !== 'livre') {
+          salaHtml += `<tr><td>${String(h).padStart(2,'0')}:00</td><td>${slot.aluno || slot.status}</td></tr>`;
+        }
+      }
+      if (!salaHtml) salaHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem reservas hoje</td></tr>';
+
+      const dataAtual = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+      const html = `<!DOCTYPE html><html lang="pt-BR"><head>
+<meta charset="UTF-8"><title>Agenda do Dia — ${dataFormatada}</title>
+<style>
+  body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;padding:30px;color:#222;}
+  h1{font-size:16px;text-transform:uppercase;letter-spacing:2px;color:#0F4D3F;text-align:center;border-bottom:2px solid #0F4D3F;padding-bottom:12px;margin-bottom:6px;}
+  .data{text-align:center;color:#666;font-size:13px;margin-bottom:30px;}
+  h2{font-size:14px;text-transform:uppercase;letter-spacing:1px;color:#0F4D3F;margin:24px 0 8px;}
+  table{width:100%;border-collapse:collapse;}
+  th,td{border:1px solid #ddd;padding:8px 12px;font-size:13px;}
+  th{background:#0F4D3F;color:white;}
+  .btn-print{margin-top:30px;padding:10px 20px;background:#0F4D3F;color:white;border:none;cursor:pointer;font-size:14px;border-radius:6px;}
+  @media print{.btn-print{display:none;}}
+</style></head><body>
+<h1>PMPE · APMP · DAS — Agenda do Dia</h1>
+<div class="data">${diaNome}, ${dataFormatada}</div>
+<h2>🧠 Psicólogo — Murilo</h2>
+<table><tr><th>Horário</th><th>Aluno</th></tr>${psicoHtml}</table>
+<h2>🚪 Sala</h2>
+<table><tr><th>Horário</th><th>Aluno</th></tr>${salaHtml}</table>
+<button class="btn-print" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
+</body></html>`;
+      const win = window.open('', '_blank');
+      win.document.write(html);
+      win.document.close();
+    });
   }
 
   // Fallback manual via wa.me (quando Z-API não está configurado)

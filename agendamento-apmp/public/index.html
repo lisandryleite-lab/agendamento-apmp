@@ -410,6 +410,7 @@
   <div class="hero-ctas">
     <button class="btn-hero primario" onclick="abrirModal('terapia')">Agendar terapia <span>→</span></button>
     <button class="btn-hero secundario" onclick="abrirModal('sala')">Reservar sala</button>
+    <button class="btn-hero secundario" onclick="abrirModalCancelar()" style="background:rgba(163,45,45,0.25);border-color:rgba(163,45,45,0.4);">✕ Cancelar agendamento</button>
   </div>
 </header>
 
@@ -499,11 +500,7 @@
           <strong>Vínculo institucional:</strong> Núcleo de Saúde Mental da PMPE / Diretoria de Assistência Social (DAS).
         </div>
 
-        <!-- BLOCO PESSOAL — Lisandry vai completar -->
-        <div class="psicologo-pessoa">
-          <strong>Sobre o Murilo:</strong>
-          [Texto pessoal a ser preenchido — descreva quem ele é como pessoa, postura clínica, traços que humanizam o atendimento.]
-        </div>
+
       </div>
     </div>
 
@@ -578,7 +575,7 @@
   <section class="section">
     <span class="section-tag">Como funciona</span>
     <h2 class="section-title">Protocolos da APMP.</h2>
-    <p class="section-lead">Dois fluxos distintos. <strong>Card A</strong>: sessão com o psicólogo da APMP. <strong>Card B</strong>: reserva da sala para atendimento online com psicólogo particular. Em ambos, a chave fica <em>na guarda</em>, com o efetivo da guarda, mediante registro.</p>
+    <p class="section-lead">Dois fluxos distintos. <strong>Protocolo A</strong>: sessão com o psicólogo da APMP. <strong>Protocolo B</strong>: reserva da sala para atendimento online com psicólogo particular.</p>
 
     <div class="protocolos-grid">
 
@@ -587,18 +584,12 @@
         <span class="protocolo-tag">🧠 Card A · Sessão APMP</span>
         <div class="protocolo-letra">Protocolo A</div>
         <h3 class="protocolo-titulo">Sessão com o psicólogo da APMP</h3>
-        <p class="protocolo-desc">Quatro passos para a sessão presencial com Murilo, no horário marcado pela agenda do psicólogo (ter/qui · 40min).</p>
 
         <ol class="protocolo-passos">
-          <li><strong>Informe ao seu Xerife.</strong> Comunique que você irá à sala da psicologia para atendimento no horário marcado.</li>
-          <li><strong>No dia da consulta.</strong> Informe ao Auxiliar/Adjunto da sua companhia sobre o atendimento, assim que possível.</li>
-          <li><strong>Acesso à sala.</strong> Verifique com o Auxiliar/Adjunto quem irá <strong>se armar com a chave na guarda</strong> — você ou ele.</li>
-          <li><strong>Conclusão da sessão.</strong> Após o atendimento, devolva a chave à guarda e dê retorno ao aluno responsável pela psicologia: se tudo correu bem ou se houve alguma alteração. É importante para podermos sempre melhorar.</li>
+          <li>Fazer agendamento no site e aguardar confirmação</li>
+          <li>Avisar ao xerife/auxiliar ou adjunto</li>
+          <li>Aproveitar a sessão e retorno à instrução</li>
         </ol>
-
-        <div class="protocolo-chave">
-          🔑 <strong>Chave:</strong> fica na guarda, com o efetivo da guarda, mediante registro.
-        </div>
       </div>
 
       <!-- CARD B: Reserva da sala -->
@@ -606,18 +597,16 @@
         <span class="protocolo-tag">🚪 Card B · Reserva da sala</span>
         <div class="protocolo-letra">Protocolo B</div>
         <h3 class="protocolo-titulo">Reserva da sala — atendimento online particular</h3>
-        <p class="protocolo-desc">Quatro passos para usar a sala física para sessão online com seu psicólogo particular, no horário reservado (24h · 1h).</p>
 
         <ol class="protocolo-passos">
-          <li><strong>Confirme a reserva.</strong> Verifique previamente com o titular da sua CIA se a sala está disponível no horário desejado e aguarde a confirmação.</li>
-          <li><strong>No dia da sessão.</strong> Informe ao Auxiliar/Adjunto da sua companhia sobre o uso da sala, assim que possível.</li>
-          <li><strong>Acesso à sala.</strong> Verifique com o Auxiliar/Adjunto quem irá <strong>se armar com a chave na guarda</strong> — você ou ele.</li>
-          <li><strong>Conclusão do uso.</strong> Devolva a sala em ordem (como encontrou), entregue a chave à guarda e dê retorno ao aluno responsável pela psicologia.</li>
+          <li>Agendar com seu psicólogo ou Escuta SUSP</li>
+          <li>Reservar a sala no site</li>
+          <li>Aguardar confirmação da reserva</li>
+          <li>No dia da sessão, confirme com seu psicólogo</li>
+          <li>Após confirmar, informe ao xerife, auxiliar e adjunto</li>
+          <li>Acesso à sala — retire a chave na guarda</li>
+          <li>Conclusão — devolva a sala em ordem e devolva a chave na guarda</li>
         </ol>
-
-        <div class="protocolo-chave">
-          🔑 <strong>Chave:</strong> fica na guarda, com o efetivo da guarda, mediante registro.
-        </div>
       </div>
 
     </div>
@@ -669,15 +658,6 @@
         </div></div>
       </div>
 
-      <div class="faq-item">
-        <button class="faq-pergunta" onclick="toggleFaq(this)">
-          <span>E se a tropa estiver em forma quando eu sair da sessão?</span>
-          <span class="faq-toggle">+</span>
-        </button>
-        <div class="faq-resposta"><div class="faq-resposta-inner">
-          Você fica <strong>dispensado da apresentação</strong> naquele momento — é possível aguardar a próxima formatura para se incorporar.
-        </div></div>
-      </div>
 
       <div class="faq-item">
         <button class="faq-pergunta" onclick="toggleFaq(this)">
@@ -819,7 +799,7 @@
     <form id="formAgendamento" onsubmit="enviarSolicitacao(event)">
       <div class="form-grupo">
         <label for="nomeGuerra">Nome de guerra *</label>
-        <input type="text" id="nomeGuerra" required placeholder="Ex.: Silva, Lisandry, Gomes…">
+        <input type="text" id="nomeGuerra" required placeholder="Ex.: SILVA">
       </div>
 
       <div class="form-row-3">
@@ -851,7 +831,7 @@
 
       <div class="form-grupo">
         <label for="zapAluno">Seu WhatsApp (com DDD) *</label>
-        <input type="tel" id="zapAluno" required placeholder="Ex.: 81 989047832">
+        <input type="tel" id="zapAluno" required placeholder="Ex.: 81 900000000">
       </div>
 
       <div id="campos-terapia">
@@ -899,6 +879,50 @@
       </div>
 
       <button type="submit" class="btn-enviar" id="btnEnviar">Solicitar agendamento →</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Cancelar agendamento -->
+<div class="modal-overlay" id="modalCancelar">
+  <div class="modal">
+    <button class="modal-close" onclick="fecharModalCancelar()">×</button>
+    <h2>Solicitar cancelamento</h2>
+    <p class="modal-sub">Informe os dados e encaminhe a solicitação ao responsável da sua CIA via WhatsApp.</p>
+    <form onsubmit="enviarCancelamento(event)">
+      <div class="form-grupo">
+        <label for="cancel-nome">Nome de guerra *</label>
+        <input type="text" id="cancel-nome" required placeholder="Ex.: SILVA">
+      </div>
+      <div class="form-row">
+        <div class="form-grupo">
+          <label for="cancel-al">AL *</label>
+          <input type="text" id="cancel-al" required placeholder="108">
+        </div>
+        <div class="form-grupo">
+          <label for="cancel-cia">CIA *</label>
+          <select id="cancel-cia" required>
+            <option value="">—</option>
+            <option value="1">1ª CIA</option>
+            <option value="2">2ª CIA</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-tipo">
+        <button type="button" class="modal-tipo-btn ativo" id="cancelTipoBtnTerapia" onclick="mudarTipoCancelar('terapia')">🧠 Terapia</button>
+        <button type="button" class="modal-tipo-btn" id="cancelTipoBtnSala" onclick="mudarTipoCancelar('sala')">🚪 Sala</button>
+      </div>
+      <div class="form-row">
+        <div class="form-grupo">
+          <label for="cancel-data">Data do agendamento *</label>
+          <input type="text" id="cancel-data" required placeholder="Ex.: 20/05/2026">
+        </div>
+        <div class="form-grupo">
+          <label for="cancel-horario">Horário *</label>
+          <input type="text" id="cancel-horario" required placeholder="Ex.: 09:00">
+        </div>
+      </div>
+      <button type="submit" class="btn-enviar" style="background:var(--vermelho);">Enviar via WhatsApp →</button>
     </form>
   </div>
 </div>
@@ -959,17 +983,19 @@
     } catch { /* exibe tudo como livre em caso de falha */ }
 
     const horarios = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     let html = '';
     [terca, quinta].forEach(data => {
       const nomeDia = DIAS_PT[data.getDay()];
       const dataIso = isoDate(data);
+      const passado = data < hoje;
       html += `<div class="dia-bloco"><div class="dia-titulo">${nomeDia} <span class="data">${formatarData(data)}</span></div><div class="horarios-grid">`;
       horarios.forEach(h => {
         const slot = dados[`${dataIso}-${h}`] || {};
         const status = typeof slot === 'string' ? slot : (slot.status || 'livre');
-        const labelStatus = { livre: 'Livre', pendente: 'Pendente', indisponivel: 'Ocupado', aprovado: 'Ocupado' }[status] || 'Ocupado';
-        const classeStatus = (status === 'aprovado' || status === 'indisponivel') ? 'indisponivel' : status;
-        const onclick = status === 'livre' ? `onclick="selecionarTerapiaCalendario('${dataIso}','${h}')"` : '';
+        const labelStatus = passado ? '—' : ({ livre: 'Livre', pendente: 'Pendente', indisponivel: 'Ocupado', aprovado: 'Ocupado' }[status] || 'Ocupado');
+        const classeStatus = passado ? 'indisponivel' : ((status === 'aprovado' || status === 'indisponivel') ? 'indisponivel' : status);
+        const onclick = (!passado && status === 'livre') ? `onclick="selecionarTerapiaCalendario('${dataIso}','${h}')"` : '';
         html += `<div class="horario ${classeStatus}" ${onclick}><div class="horario-hora">${h}</div><div class="horario-status">● ${labelStatus}</div></div>`;
       });
       html += `</div></div>`;
@@ -1162,7 +1188,42 @@
   preencherHorariosSala();
 
   document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') fecharModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModal(); });
+  document.getElementById('modalCancelar').addEventListener('click', e => { if (e.target.id === 'modalCancelar') fecharModalCancelar(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { fecharModal(); fecharModalCancelar(); } });
+
+  // ── Cancelamento ─────────────────────────────────────────────────────────
+  let tipoCancelar = 'terapia';
+  function abrirModalCancelar() {
+    document.getElementById('modalCancelar').classList.add('ativo');
+    document.body.style.overflow = 'hidden';
+  }
+  function fecharModalCancelar() {
+    document.getElementById('modalCancelar').classList.remove('ativo');
+    document.body.style.overflow = '';
+  }
+  function mudarTipoCancelar(tipo) {
+    tipoCancelar = tipo;
+    document.getElementById('cancelTipoBtnTerapia').classList.toggle('ativo', tipo === 'terapia');
+    document.getElementById('cancelTipoBtnSala').classList.toggle('ativo', tipo === 'sala');
+  }
+  function enviarCancelamento(e) {
+    e.preventDefault();
+    const nome    = document.getElementById('cancel-nome').value.trim();
+    const al      = document.getElementById('cancel-al').value.trim();
+    const cia     = document.getElementById('cancel-cia').value;
+    const data    = document.getElementById('cancel-data').value.trim();
+    const horario = document.getElementById('cancel-horario').value.trim();
+    const tipoLabel = tipoCancelar === 'terapia' ? 'terapia' : 'reserva de sala';
+    const msg = encodeURIComponent(`Olá! Sou *${nome}*, AL ${al}, ${cia}ª CIA. Gostaria de *cancelar* meu agendamento de ${tipoLabel} para *${data}* às *${horario}*. Por favor, confirme o cancelamento.`);
+    const zaps = { '1': null, '2': '5581989047832' };
+    const zap = zaps[cia];
+    if (!zap) {
+      alert('Para a 1ª CIA, entre em contato diretamente com o responsável da sua companhia.');
+      return;
+    }
+    window.open(`https://wa.me/${zap}?text=${msg}`, '_blank');
+    fecharModalCancelar();
+  }
 </script>
 
 </body>

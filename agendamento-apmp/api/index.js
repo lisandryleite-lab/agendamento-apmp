@@ -105,8 +105,8 @@ app.patch('/api/agendamentos/:id', exigirAuth, async (req, res) => {
   try {
     const { status, enviarZap } = req.body;
 
-    if (!['aprovado', 'rejeitado'].includes(status)) {
-      return res.status(400).json({ erro: 'Status deve ser "aprovado" ou "rejeitado"' });
+    if (!['aprovado', 'rejeitado', 'nao_compareceu', 'cancelado'].includes(status)) {
+      return res.status(400).json({ erro: 'Status inválido' });
     }
 
     const ag = await Agendamento.findByIdAndUpdate(
@@ -117,7 +117,7 @@ app.patch('/api/agendamentos/:id', exigirAuth, async (req, res) => {
     if (!ag) return res.status(404).json({ erro: 'Agendamento não encontrado' });
 
     // Envia WhatsApp ao aluno (automático)
-    if (ag.zap && enviarZap !== false) {
+    if (ag.zap && enviarZap !== false && ['aprovado', 'rejeitado'].includes(status)) {
       const msg = status === 'aprovado'
         ? (ag.tipo === 'terapia' ? msgAprovacaoTerapia(ag) : msgAprovacaoSala(ag))
         : msgRejeicao(ag);
