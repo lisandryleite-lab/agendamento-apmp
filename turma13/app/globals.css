@@ -1,8 +1,28 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @custom-variant dark (&:is(.dark *));
+
+/* ── Identidade Visual — Portal Turma 13 ── */
+:root {
+  --azul-profundo: #0B2D5E;
+  --azul-medio:   #1A52A8;
+  --azul-suave:   #2E74D4;
+  --azul-claro:   #E8EFF8;
+  --creme:        #F4F7FC;
+  --dourado:      #B8924A;
+  --dourado-claro:#DDB876;
+  --grafite:      #1C2636;
+  --cinza-texto:  #4A5568;
+  --cinza-borda:  rgba(11, 45, 94, 0.10);
+  --serif:        'Fraunces', Georgia, serif;
+  --sans:         'Inter', -apple-system, sans-serif;
+  --shadow-sm:    0 1px 3px rgba(11, 45, 94, 0.06);
+  --shadow-md:    0 4px 16px rgba(11, 45, 94, 0.10);
+  --shadow-lg:    0 12px 40px rgba(11, 45, 94, 0.14);
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -49,7 +69,8 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: oklch(0.971 0.007 240);
+  /* azul muito claro (#F4F7FC) */
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);

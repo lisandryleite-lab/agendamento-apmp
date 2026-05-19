@@ -7,7 +7,7 @@ export default async function LogadoLayout({ children }: { children: React.React
   if (!session) redirect("/login")
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--creme)" }}>
       <Nav isAdmin={(session.user as any).isAdmin} />
       <div className="flex-1">{children}</div>
     </div>
