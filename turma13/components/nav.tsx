@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react"
 
 const links = [
   { href: "/dashboard",    label: "Início" },
+  { href: "/ranking",      label: "Ranking" },
   { href: "/qts",          label: "QTS" },
   { href: "/aulas",        label: "Aulas" },
   { href: "/missao",       label: "Missão" },
@@ -14,6 +15,7 @@ const links = [
   { href: "/turma",        label: "Turma" },
   { href: "/aniversarios", label: "Aniversários" },
   { href: "/avisos",       label: "Avisos" },
+  { href: "/links",        label: "Links" },
 ]
 
 export function Nav({ isAdmin }: { isAdmin?: boolean }) {

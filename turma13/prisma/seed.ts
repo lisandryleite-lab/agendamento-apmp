@@ -144,6 +144,7 @@ async function main() {
         isAdmin: !!(a as any).admin,
         aniversario: (a as any).aniv || null,
         canga: (a as any).canga || null,
+        cangaPar: (a as any).par || null,
         grupoPlantao: (a as any).plantao || null,
         grupoFaxina: (a as any).faxina || null,
       },

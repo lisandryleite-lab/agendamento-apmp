@@ -17,6 +17,7 @@ model User {
   isAdmin      Boolean   @default(false)
   aniversario  String?
   canga        String?
+  cangaPar     Int?     // matrícula do par de canga
   grupoPlantao String?
   grupoFaxina  String?
   createdAt    DateTime  @default(now())
@@ -203,4 +204,32 @@ model EscalaPlantao {
   semana Int
   grupo  String
   tipo   String
+}
+
+// Plantão externo (2ª CIA) — admin insere mensalmente
+model PlantaoDia {
+  id           String   @id @default(cuid())
+  data         DateTime @unique
+  grupoPlantao String   // LIMA | GOLF | HOTEL | INDIA | JULIETT | KILO
+  adjuntoMat   Int?     // matrícula do adjunto da 2ª CIA (só se for da Turma 13)
+  createdAt    DateTime @default(now())
+}
+
+// Funções de Destaque externas — admin insere mensalmente
+model FuncaoDestaqueDia {
+  id        String   @id @default(cuid())
+  data      DateTime
+  funcao    String   // Mestre | Leitor | Discurso | Comandante
+  matricula Int
+  createdAt DateTime @default(now())
+
+  @@unique([data, funcao])
+}
+
+// Referência para cálculo automático da faxina
+model FaxinaRef {
+  id            String   @id @default(cuid())
+  dataRef       DateTime @unique // dia útil conhecido
+  grupoRef      String            // grupo que fez faxina nesse dia (G1..G8)
+  createdAt     DateTime @default(now())
 }

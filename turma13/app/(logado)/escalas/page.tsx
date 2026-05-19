@@ -1,115 +1,95 @@
-import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
-import { EscalasAdmin } from "./escalas-admin"
+import { prisma } from "@/lib/prisma"
+import { EscalasClient } from "./escalas-client"
+import {
+  calcularServico,
+  calendarioFaxinaMes,
+  COMPOSICAO_FAXINA,
+  MEMBROS_PLANTAO,
+  MATRICULAS_ORDEM,
+} from "@/lib/escalas"
 
 export const dynamic = "force-dynamic"
 
-const SEMANA_ATUAL = 19
-
-const ESCALA_SERVICO_FIXA: Record<number, { p1: number; p3: number; p4: number; p1Nome: string; p3Nome: string; p4Nome: string }> = {
-  19: { p1: 55, p3: 57, p4: 60, p1Nome: "SHIRLAYNE", p3Nome: "CLEYTON", p4Nome: "JOÃO NUNES" },
-  20: { p1: 57, p3: 60, p4: 65, p1Nome: "CLEYTON", p3Nome: "JOÃO NUNES", p4Nome: "KAUHANNI" },
-  21: { p1: 60, p3: 65, p4: 71, p1Nome: "JOÃO NUNES", p3Nome: "KAUHANNI", p4Nome: "LEIMIG" },
-  22: { p1: 65, p3: 71, p4: 76, p1Nome: "KAUHANNI", p3Nome: "LEIMIG", p4Nome: "ARAÚJO JR" },
+function semanaAtual() {
+  const inicio = new Date("2026-01-05")
+  const diff = Date.now() - inicio.getTime()
+  return Math.min(52, Math.max(1, Math.ceil(diff / (7 * 24 * 60 * 60 * 1000))))
 }
 
-const GRUPOS_FAXINA = ["G1","G2","G3","G4","G5","G6","G7","G8"]
-const GRUPOS_PLANTAO = ["GOLF","HOTEL","INDIA","JULIETT","KILO","LIMA"]
+function mesAtual() {
+  const hoje = new Date()
+  return { ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 }
+}
 
 export default async function EscalasPage() {
   const session = await auth()
   const isAdmin = (session?.user as any)?.isAdmin
+  const minhaMatricula = (session?.user as any)?.matricula as number
 
-  const [servico, faxinas, plantoes, alunos] = await Promise.all([
-    prisma.escalaServico.findUnique({ where: { semana: SEMANA_ATUAL } }),
-    prisma.escalaFaxina.findMany({ where: { semana: SEMANA_ATUAL } }),
-    prisma.escalaPlantao.findMany({ where: { semana: SEMANA_ATUAL } }),
+  const semana = semanaAtual()
+  const { ano, mes } = mesAtual()
+
+  // Dados calculados automaticamente
+  const servico = calcularServico(semana)
+  const calendario = calendarioFaxinaMes(ano, mes)
+
+  // Dados externos (admin insere)
+  const inicio = new Date(ano, mes - 1, 1)
+  const fim = new Date(ano, mes, 0, 23, 59, 59)
+  const [plantaoDias, funcoesDias, alunos] = await Promise.all([
+    prisma.plantaoDia.findMany({ where: { data: { gte: inicio, lte: fim } }, orderBy: { data: "asc" } }),
+    prisma.funcaoDestaqueDia.findMany({ where: { data: { gte: inicio, lte: fim } }, orderBy: [{ data: "asc" }, { funcao: "asc" }] }),
     prisma.user.findMany({
       where: { isAdmin: false },
-      orderBy: { matricula: "asc" },
       select: { matricula: true, nomeGuerra: true, grupoFaxina: true, grupoPlantao: true },
+      orderBy: { matricula: "asc" },
     }),
   ])
 
-  const servicoFixo = ESCALA_SERVICO_FIXA[SEMANA_ATUAL]
+  // Monta mapa nome de guerra por matrícula
+  const nomesPorMat: Record<number, string> = {}
+  for (const a of alunos) nomesPorMat[a.matricula] = a.nomeGuerra
 
-  const porGrupoFaxina: Record<string, typeof alunos> = {}
-  for (const g of GRUPOS_FAXINA) porGrupoFaxina[g] = []
-  for (const a of alunos) {
-    if (a.grupoFaxina && porGrupoFaxina[a.grupoFaxina]) porGrupoFaxina[a.grupoFaxina].push(a)
+  // P1/P3/P4 com nomes
+  const servicoComNomes = {
+    semana,
+    p1: servico.p1 ? { mat: servico.p1, nome: nomesPorMat[servico.p1] ?? `Mat.${servico.p1}` } : null,
+    p3: servico.p3 ? { mat: servico.p3, nome: nomesPorMat[servico.p3] ?? `Mat.${servico.p3}` } : null,
+    p4: servico.p4 ? { mat: servico.p4, nome: nomesPorMat[servico.p4] ?? `Mat.${servico.p4}` } : null,
   }
 
-  const porGrupoPlantao: Record<string, typeof alunos> = {}
-  for (const g of GRUPOS_PLANTAO) porGrupoPlantao[g] = []
-  for (const a of alunos) {
-    if (a.grupoPlantao && porGrupoPlantao[a.grupoPlantao]) porGrupoPlantao[a.grupoPlantao].push(a)
-  }
+  // Próximas 4 semanas de serviço
+  const proximasSemanasServico = Array.from({ length: 4 }, (_, i) => {
+    const s = semana + i
+    const sv = calcularServico(s)
+    return {
+      semana: s,
+      p1: sv.p1 ? { mat: sv.p1, nome: nomesPorMat[sv.p1] ?? `Mat.${sv.p1}` } : null,
+      p3: sv.p3 ? { mat: sv.p3, nome: nomesPorMat[sv.p3] ?? `Mat.${sv.p3}` } : null,
+      p4: sv.p4 ? { mat: sv.p4, nome: nomesPorMat[sv.p4] ?? `Mat.${sv.p4}` } : null,
+    }
+  })
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-      <h1 className="text-2xl font-bold text-slate-900">Escalas — Semana {SEMANA_ATUAL}</h1>
-
-      {/* Escala de Serviço */}
-      <section>
-        <h2 className="text-lg font-semibold text-slate-800 mb-3">Escala de Serviço</h2>
-        <div className="grid sm:grid-cols-3 gap-4">
-          {[
-            { funcao: "P1 — Pessoal", mat: servicoFixo?.p1, nome: servicoFixo?.p1Nome },
-            { funcao: "P3 — Operações", mat: servicoFixo?.p3, nome: servicoFixo?.p3Nome },
-            { funcao: "P4 — Logística", mat: servicoFixo?.p4, nome: servicoFixo?.p4Nome },
-          ].map((item) => (
-            <div key={item.funcao} className="bg-white border border-slate-200 rounded-xl p-4 text-center">
-              <p className="text-xs text-slate-500 mb-1">{item.funcao}</p>
-              <p className="font-bold text-slate-800">{item.nome || "—"}</p>
-              {item.mat && <p className="text-slate-400 text-xs">Mat. {item.mat}</p>}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Grupos de Faxina */}
-      <section>
-        <h2 className="text-lg font-semibold text-slate-800 mb-3">Grupos de Faxina</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {GRUPOS_FAXINA.map((g) => (
-            <div key={g} className="bg-white border border-slate-200 rounded-xl p-4">
-              <p className="text-xs font-semibold text-slate-500 mb-2">{g}</p>
-              {porGrupoFaxina[g].length === 0 ? (
-                <p className="text-slate-400 text-xs">Sem dados</p>
-              ) : (
-                <ul className="space-y-0.5">
-                  {porGrupoFaxina[g].map((a) => (
-                    <li key={a.matricula} className="text-sm text-slate-700">{a.nomeGuerra}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Grupos de Plantão */}
-      <section>
-        <h2 className="text-lg font-semibold text-slate-800 mb-3">Grupos de Plantão</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {GRUPOS_PLANTAO.map((g) => (
-            <div key={g} className="bg-white border border-slate-200 rounded-xl p-4">
-              <p className="text-xs font-semibold text-slate-500 mb-2">{g}</p>
-              {porGrupoPlantao[g].length === 0 ? (
-                <p className="text-slate-400 text-xs">Sem dados</p>
-              ) : (
-                <ul className="space-y-0.5">
-                  {porGrupoPlantao[g].map((a) => (
-                    <li key={a.matricula} className="text-sm text-slate-700">{a.nomeGuerra}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {isAdmin && <EscalasAdmin semanaAtual={SEMANA_ATUAL} alunos={alunos} />}
-    </div>
+    <EscalasClient
+      semana={semana}
+      ano={ano}
+      mes={mes}
+      isAdmin={isAdmin}
+      minhaMatricula={minhaMatricula}
+      servicoAtual={servicoComNomes}
+      proximasSemanasServico={proximasSemanasServico}
+      calendario={calendario.map(d => ({
+        ...d,
+        data: d.data.toISOString(),
+      }))}
+      composicaoFaxina={COMPOSICAO_FAXINA}
+      membrosPlantao={MEMBROS_PLANTAO}
+      plantaoDias={plantaoDias.map(p => ({ ...p, data: p.data.toISOString() }))}
+      funcoesDias={funcoesDias.map(f => ({ ...f, data: f.data.toISOString() }))}
+      nomesPorMat={nomesPorMat}
+      alunos={alunos}
+    />
   )
 }
