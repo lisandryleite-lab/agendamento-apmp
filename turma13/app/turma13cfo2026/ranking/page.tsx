@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { calcularMGC } from "@/lib/ranking"
+import { calcularMGCSimples } from "@/lib/ranking"
 
 export const dynamic = "force-dynamic"
 
@@ -15,7 +15,7 @@ export default async function RankingPage() {
       select: { id: true, matricula: true, nomeGuerra: true, canga: true },
     }),
     prisma.nota.findMany({
-      select: { userId: true, disciplina: true, avaliacao: true, nota: true, peso: true },
+      select: { userId: true, disciplina: true, avaliacao: true, nota: true, peso: true, ehAF: true, apto: true },
     }),
   ])
 
@@ -28,7 +28,16 @@ export default async function RankingPage() {
   const ranking = alunos
     .map((a) => ({
       ...a,
-      mgc: calcularMGC(notasPorUser[a.id] || []),
+      mgc: calcularMGCSimples(
+        (notasPorUser[a.id] || []).map((n) => ({
+          disciplina: n.disciplina,
+          avaliacao: n.avaliacao,
+          nota: n.nota,
+          peso: n.peso,
+          ehAF: n.ehAF,
+          apto: n.apto,
+        }))
+      ),
     }))
     .sort((a, b) => {
       if (a.mgc === null && b.mgc === null) return a.matricula - b.matricula
@@ -42,27 +51,26 @@ export default async function RankingPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-xl font-bold text-gray-900 mb-2">Ranking da Turma</h1>
-      <p className="text-sm text-gray-500 mb-6">
-        MGC calculada com base nas notas lançadas pelos alunos.{" "}
-        <span className="text-amber-600 font-medium">Fórmula: pendente (Decreto CFO 2024).</span>
+      <h1 className="text-xl font-bold text-gray-900 mb-1">Ranking da Turma</h1>
+      <p className="text-xs text-gray-400 mb-6">
+        MGC = (MFIC × 6,5 + NFDC × 2,5 + TCC × 1) / 10 · Decreto 57.694/2024
       </p>
 
       {/* Card da posição do aluno logado */}
       {minhaEntrada && (
         <div className="bg-blue-900 text-white rounded-xl p-4 mb-6 flex items-center gap-4">
-          <div className="text-3xl font-bold w-12 text-center">
+          <div className="text-3xl font-bold w-14 text-center shrink-0">
             {minhaPos + 1}º
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <p className="font-semibold">{minhaEntrada.nomeGuerra}</p>
             <p className="text-blue-200 text-sm">
               Mat. {minhaEntrada.matricula} · Canga: {minhaEntrada.canga || "—"}
             </p>
           </div>
-          <div className="ml-auto text-right">
+          <div className="text-right shrink-0">
             <p className="text-2xl font-bold">
-              {minhaEntrada.mgc !== null ? minhaEntrada.mgc.toFixed(2) : "—"}
+              {minhaEntrada.mgc !== null ? minhaEntrada.mgc.toFixed(3) : "—"}
             </p>
             <p className="text-blue-300 text-xs">MGC</p>
           </div>
@@ -74,7 +82,7 @@ export default async function RankingPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-              <th className="px-4 py-3 text-left w-12">#</th>
+              <th className="px-4 py-3 text-left w-10">#</th>
               <th className="px-4 py-3 text-left">Nome de Guerra</th>
               <th className="px-4 py-3 text-left hidden sm:table-cell">Mat.</th>
               <th className="px-4 py-3 text-left hidden md:table-cell">Canga</th>
@@ -85,21 +93,19 @@ export default async function RankingPage() {
             {ranking.map((a, i) => {
               const isMe = a.matricula === minha
               return (
-                <tr
-                  key={a.matricula}
-                  className={`border-t border-gray-100 ${isMe ? "bg-blue-50" : "hover:bg-gray-50"}`}
-                >
-                  <td className="px-4 py-3 text-gray-500 font-medium">
+                <tr key={a.matricula}
+                  className={`border-t border-gray-100 ${isMe ? "bg-blue-50 font-semibold" : "hover:bg-gray-50"}`}>
+                  <td className="px-4 py-3 text-gray-500">
                     {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-900">
+                  <td className="px-4 py-3 text-gray-900">
                     {a.nomeGuerra}
-                    {isMe && <span className="ml-2 text-xs text-blue-600">(você)</span>}
+                    {isMe && <span className="ml-2 text-xs text-blue-600 font-normal">(você)</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{a.matricula}</td>
                   <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{a.canga || "—"}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-gray-800">
-                    {a.mgc !== null ? a.mgc.toFixed(2) : <span className="text-gray-300">—</span>}
+                  <td className="px-4 py-3 text-right font-mono text-gray-800">
+                    {a.mgc !== null ? a.mgc.toFixed(3) : <span className="text-gray-300">—</span>}
                   </td>
                 </tr>
               )

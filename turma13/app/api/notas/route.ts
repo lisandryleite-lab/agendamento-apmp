@@ -21,17 +21,17 @@ export async function POST(req: NextRequest) {
   const userId = session.user.id!
 
   const body = await req.json()
-  const { disciplina, avaliacao, nota, peso, data, observacao } = body
+  const { disciplina, avaliacao, nota, data, observacao, ehAF, apto } = body
 
-  if (!disciplina || !avaliacao || nota === undefined || nota === null || !data)
+  if (!disciplina || !avaliacao || !data)
     return NextResponse.json({ error: "Campos obrigatórios ausentes" }, { status: 400 })
 
-  const notaNum = Number(nota)
-  if (isNaN(notaNum) || notaNum < 0 || notaNum > 10)
+  const notaNum = apto ? 0 : Number(nota)
+  if (!apto && (isNaN(notaNum) || notaNum < 0 || notaNum > 10))
     return NextResponse.json({ error: "Nota deve ser entre 0 e 10" }, { status: 400 })
 
   const registro = await prisma.nota.create({
-    data: { userId, disciplina, avaliacao, nota: notaNum, peso: Number(peso) || 1, data: new Date(data), observacao: observacao || null },
+    data: { userId, disciplina, avaliacao, nota: notaNum, peso: 1, ehAF: !!ehAF, apto: !!apto, data: new Date(data), observacao: observacao || null },
   })
 
   await prisma.historicoNota.create({

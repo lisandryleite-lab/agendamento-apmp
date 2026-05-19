@@ -80,6 +80,8 @@ model Nota {
   avaliacao   String
   nota        Float
   peso        Float    @default(1)
+  ehAF        Boolean  @default(false)
+  apto        Boolean  @default(false)
   data        DateTime
   observacao  String?
   createdAt   DateTime @default(now())

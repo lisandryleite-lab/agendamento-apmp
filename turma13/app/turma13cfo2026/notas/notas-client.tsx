@@ -3,10 +3,10 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
-type Nota = { id: string; disciplina: string; avaliacao: string; nota: number; peso: number; data: Date; observacao: string | null }
+type Nota = { id: string; disciplina: string; avaliacao: string; nota: number; peso: number; ehAF: boolean; apto: boolean; data: Date; observacao: string | null }
 type Disc = { sigla: string; nome: string }
 
-const VAZIO = { disciplina: "", avaliacao: "", nota: "", peso: "1", data: "", observacao: "" }
+const VAZIO = { disciplina: "", avaliacao: "", nota: "", ehAF: false, apto: false, data: "", observacao: "" }
 
 export function NotasClient({ notas: init, disciplinas }: { notas: Nota[]; disciplinas: Disc[] }) {
   const router = useRouter()
@@ -30,7 +30,8 @@ export function NotasClient({ notas: init, disciplinas }: { notas: Nota[]; disci
       disciplina: n.disciplina,
       avaliacao: n.avaliacao,
       nota: String(n.nota),
-      peso: String(n.peso),
+      ehAF: n.ehAF,
+      apto: n.apto,
       data: new Date(n.data).toISOString().split("T")[0],
       observacao: n.observacao || "",
     })
@@ -40,8 +41,8 @@ export function NotasClient({ notas: init, disciplinas }: { notas: Nota[]; disci
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault()
-    const notaNum = Number(form.nota.replace(",", "."))
-    if (isNaN(notaNum) || notaNum < 0 || notaNum > 10) {
+    const notaNum = form.apto ? 0 : Number(form.nota.replace(",", "."))
+    if (!form.apto && (isNaN(notaNum) || notaNum < 0 || notaNum > 10)) {
       setErro("Nota deve ser um número entre 0 e 10.")
       return
     }
@@ -71,9 +72,14 @@ export function NotasClient({ notas: init, disciplinas }: { notas: Nota[]; disci
 
   return (
     <div className="space-y-4">
-      <button onClick={abrirNovo} className="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">
-        + Nova Nota
-      </button>
+      <div className="flex items-center justify-between">
+        <button onClick={abrirNovo} className="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">
+          + Nova Nota
+        </button>
+        <p className="text-xs text-gray-400">
+          Fórmula: MGC = (MFIC × 6,5 + NFDC × 2,5 + TCC × 1) / 10
+        </p>
+      </div>
 
       {showForm && (
         <form onSubmit={salvar} className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
@@ -94,24 +100,39 @@ export function NotasClient({ notas: init, disciplinas }: { notas: Nota[]; disci
             <div>
               <label className="text-xs text-gray-500 block mb-1">Avaliação</label>
               <input value={form.avaliacao} onChange={(e) => setForm((f) => ({ ...f, avaliacao: e.target.value }))}
-                className="w-full border border-gray-300 rounded px-2 py-2 text-sm" placeholder="Ex: P1, P2, Simulado" required />
+                className="w-full border border-gray-300 rounded px-2 py-2 text-sm"
+                placeholder="Ex: P1, P2, AF, TCC" required />
             </div>
-            <div>
-              <label className="text-xs text-gray-500 block mb-1">Nota (0–10)</label>
-              <input value={form.nota} onChange={(e) => setForm((f) => ({ ...f, nota: e.target.value }))}
-                inputMode="decimal" className="w-full border border-gray-300 rounded px-2 py-2 text-sm" placeholder="Ex: 8,5" required />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 block mb-1">Peso</label>
-              <input value={form.peso} onChange={(e) => setForm((f) => ({ ...f, peso: e.target.value }))}
-                inputMode="decimal" className="w-full border border-gray-300 rounded px-2 py-2 text-sm" placeholder="1" />
-            </div>
+
+            {!form.apto && (
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Nota (0–10)</label>
+                <input value={form.nota} onChange={(e) => setForm((f) => ({ ...f, nota: e.target.value }))}
+                  inputMode="decimal" className="w-full border border-gray-300 rounded px-2 py-2 text-sm"
+                  placeholder="Ex: 8,5" required={!form.apto} />
+              </div>
+            )}
+
             <div>
               <label className="text-xs text-gray-500 block mb-1">Data</label>
               <input type="date" value={form.data} onChange={(e) => setForm((f) => ({ ...f, data: e.target.value }))}
                 className="w-full border border-gray-300 rounded px-2 py-2 text-sm" required />
             </div>
-            <div>
+
+            <div className="sm:col-span-2 flex gap-4 flex-wrap">
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" checked={form.ehAF} onChange={(e) => setForm((f) => ({ ...f, ehAF: e.target.checked, apto: false }))} />
+                <span>Avaliação Final (AF)</span>
+                <span className="text-xs text-gray-400">— usada no cálculo de MDR</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" checked={form.apto} onChange={(e) => setForm((f) => ({ ...f, apto: e.target.checked, ehAF: false, nota: "" }))} />
+                <span>Disciplina APTO/INAPTO</span>
+                <span className="text-xs text-gray-400">— não entra na MFIC</span>
+              </label>
+            </div>
+
+            <div className="sm:col-span-2">
               <label className="text-xs text-gray-500 block mb-1">Observação</label>
               <input value={form.observacao} onChange={(e) => setForm((f) => ({ ...f, observacao: e.target.value }))}
                 className="w-full border border-gray-300 rounded px-2 py-2 text-sm" placeholder="Opcional" />
@@ -123,9 +144,7 @@ export function NotasClient({ notas: init, disciplinas }: { notas: Nota[]; disci
               className="bg-blue-900 text-white px-4 py-2 rounded text-sm font-medium disabled:opacity-50">
               {saving ? "Salvando..." : "Salvar"}
             </button>
-            <button type="button" onClick={() => setShowForm(false)} className="text-gray-500 text-sm px-3 py-2 hover:text-gray-700">
-              Cancelar
-            </button>
+            <button type="button" onClick={() => setShowForm(false)} className="text-gray-500 text-sm px-3 py-2">Cancelar</button>
           </div>
         </form>
       )}
@@ -140,7 +159,7 @@ export function NotasClient({ notas: init, disciplinas }: { notas: Nota[]; disci
                 <th className="px-4 py-3 text-left">Disciplina</th>
                 <th className="px-4 py-3 text-left">Avaliação</th>
                 <th className="px-4 py-3 text-right">Nota</th>
-                <th className="px-4 py-3 text-right hidden sm:table-cell">Peso</th>
+                <th className="px-4 py-3 text-left hidden sm:table-cell">Tipo</th>
                 <th className="px-4 py-3 text-left hidden md:table-cell">Data</th>
                 <th className="px-4 py-3"></th>
               </tr>
@@ -150,8 +169,13 @@ export function NotasClient({ notas: init, disciplinas }: { notas: Nota[]; disci
                 <tr key={n.id} className="border-t border-gray-100 hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-gray-800">{n.disciplina}</td>
                   <td className="px-4 py-3 text-gray-600">{n.avaliacao}</td>
-                  <td className="px-4 py-3 text-right font-semibold">{n.nota.toFixed(1)}</td>
-                  <td className="px-4 py-3 text-right text-gray-400 hidden sm:table-cell">{n.peso}</td>
+                  <td className="px-4 py-3 text-right font-mono">
+                    {n.apto ? <span className="text-xs text-gray-400">APTO</span> : n.nota.toFixed(1)}
+                  </td>
+                  <td className="px-4 py-3 hidden sm:table-cell">
+                    {n.ehAF && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded">AF</span>}
+                    {n.apto && <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded">APTO</span>}
+                  </td>
                   <td className="px-4 py-3 text-gray-400 hidden md:table-cell">
                     {new Date(n.data).toLocaleDateString("pt-BR")}
                   </td>
