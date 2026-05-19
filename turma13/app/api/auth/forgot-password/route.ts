@@ -3,9 +3,8 @@ import { prisma } from "@/lib/prisma"
 import { Resend } from "resend"
 import { randomBytes } from "crypto"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(req: NextRequest) {
+  const resend = new Resend(process.env.RESEND_API_KEY?.trim())
   const { email } = await req.json()
   if (!email) return NextResponse.json({ error: "E-mail obrigatório" }, { status: 400 })
 
