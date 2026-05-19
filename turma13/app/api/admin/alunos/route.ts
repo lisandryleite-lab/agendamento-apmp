@@ -17,7 +17,7 @@ export async function GET() {
     select: {
       id: true, matricula: true, nomeGuerra: true, nomeCompleto: true,
       email: true, isAdmin: true, aniversario: true, canga: true,
-      cangaPar: true, grupoPlantao: true, grupoFaxina: true,
+      grupoPlantao: true, grupoFaxina: true,
     },
   })
   return NextResponse.json(alunos)
@@ -28,14 +28,14 @@ export async function POST(req: NextRequest) {
   if (!s) return NextResponse.json({ error: "Não autorizado" }, { status: 403 })
 
   const body = await req.json()
-  const { matricula, nomeGuerra, nomeCompleto, email, password, aniversario, canga, cangaPar, grupoPlantao, grupoFaxina } = body
+  const { matricula, nomeGuerra, nomeCompleto, email, password, aniversario, canga, grupoPlantao, grupoFaxina } = body
 
   if (!matricula || !nomeGuerra || !nomeCompleto || !email || !password)
     return NextResponse.json({ error: "Campos obrigatórios ausentes" }, { status: 400 })
 
   const hash = await bcrypt.hash(password, 12)
   const user = await prisma.user.create({
-    data: { matricula: Number(matricula), nomeGuerra, nomeCompleto, email, password: hash, aniversario, canga, cangaPar: cangaPar ? Number(cangaPar) : null, grupoPlantao, grupoFaxina },
+    data: { matricula: Number(matricula), nomeGuerra, nomeCompleto, email, password: hash, aniversario, canga, grupoPlantao, grupoFaxina },
   })
   return NextResponse.json({ id: user.id })
 }

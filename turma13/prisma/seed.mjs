@@ -1,12 +1,19 @@
-import { PrismaClient } from "../lib/generated/prisma/client"
+import { PrismaClient } from "../lib/generated/prisma/client.ts"
 import { PrismaNeon } from "@prisma/adapter-neon"
 import { neonConfig } from "@neondatabase/serverless"
 import ws from "ws"
 import bcrypt from "bcryptjs"
+import { readFileSync } from "fs"
+
+// Load .env manually
+const envFile = readFileSync(new URL("../.env", import.meta.url), "utf8")
+for (const line of envFile.split("\n")) {
+  const m = line.match(/^([^#=]+)=(.*)$/)
+  if (m) process.env[m[1].trim()] = m[2].trim().replace(/^"|"$/g, "")
+}
 
 neonConfig.webSocketConstructor = ws
-const connectionString = process.env.DATABASE_URL!
-const adapter = new PrismaNeon({ connectionString })
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
 
 const ALUNOS = [
@@ -16,7 +23,7 @@ const ALUNOS = [
   { mat: 19, ng: "THAIS FIGUEIREDO", nc: "Thais Faustino Figueiredo da Silva", email: "thaisfigueiredo.adv@outlook.com", aniv: "23/03", canga: "FEMININO", par: 45, plantao: "GOLF", faxina: "G7" },
   { mat: 23, ng: "RODOLFO MOURA", nc: "Rodolfo Moura de Carvalho", email: "rodolfo_moura_carvalho@hotmail.com", aniv: "21/07", canga: "ALPHA", par: 26, plantao: "HOTEL", faxina: "G8" },
   { mat: 26, ng: "ANDRE", nc: "Andre de Araujo Correia", email: "andrecorreia188@gmail.com", aniv: "30/11", canga: "ALPHA", par: 23, plantao: "KILO", faxina: "G8" },
-  { mat: 37, ng: "PABLO TORRES", nc: "Pablo Rafael Torres", email: "Pablo.direitopenal22@gmail.com", aniv: "22/06", canga: "BRAVO", par: 7, plantao: "KILO", faxina: "G8" },
+  { mat: 37, ng: "PABLO TORRES", nc: "Pablo Rafael Torres", email: "pablo.direitopenal22@gmail.com", aniv: "22/06", canga: "BRAVO", par: 7, plantao: "KILO", faxina: "G8" },
   { mat: 41, ng: "ALAN SILVA", nc: "Alan Gomes da Silva", email: "alan.gomes.da.silva@hotmail.com", aniv: "07/01", canga: "BRAVO", par: 60, plantao: "INDIA", faxina: "G6" },
   { mat: 45, ng: "GABRIELE COSTA", nc: "Gabriele Rebeca de Sena Costa", email: "gabrieledesenacosta@gmail.com", aniv: "08/07", canga: "FEMININO", par: 19, plantao: "HOTEL", faxina: "G7" },
   { mat: 54, ng: "ELDER CARVALHO", nc: "Elder de Carvalho Silva", email: "elder_carvalho.silva@hotmail.com", aniv: "16/04", canga: "ALPHA", par: 57, plantao: "HOTEL", faxina: "G7" },
@@ -32,14 +39,14 @@ const ALUNOS = [
   { mat: 105, ng: "LUCAS EDUARDO", nc: "Lucas Eduardo Rufino da Silva", email: "lucas.ers@hotmail.com", aniv: "10/07", canga: "BRAVO", par: 98, plantao: "HOTEL", faxina: "G5" },
   { mat: 106, ng: "RAFAEL RIBEIRO", nc: "Rafael Ribeiro da Silva", email: "rafaelribeiro@y7mail.com", aniv: "23/07", canga: "ALPHA", par: 81, plantao: "HOTEL", faxina: "G4" },
   { mat: 108, ng: "LISANDRY", nc: "Lisandry Julia Ferraz Leite de Souza", email: "lisandryleite@gmail.com", aniv: "08/02", canga: "FEMININO", par: 114, plantao: "LIMA", faxina: "G4", admin: true },
-  { mat: 114, ng: "JOSIANE FARIAS", nc: "Josiane Farias de Freitas", email: "Josiane.farias12@gmail.com", aniv: "01/06", canga: "FEMININO", par: 108, plantao: "LIMA", faxina: "G4" },
+  { mat: 114, ng: "JOSIANE FARIAS", nc: "Josiane Farias de Freitas", email: "josiane.farias12@gmail.com", aniv: "01/06", canga: "FEMININO", par: 108, plantao: "LIMA", faxina: "G4" },
   { mat: 116, ng: "BERTIPALHA", nc: "Guilherme Bertipalha Vieira", email: "guibertipalha@gmail.com", aniv: "23/03", canga: "BRAVO", par: null, plantao: "INDIA", faxina: "G2" },
   { mat: 131, ng: "JOSÉ INACIO", nc: "Glaybson Jose Inacio", email: "glaybsongji@yahoo.com.br", aniv: "09/02", canga: "BRAVO", par: 165, plantao: "LIMA", faxina: "G3" },
   { mat: 143, ng: "VIDAL", nc: "Renan Nogueira Vidal", email: "renan_fortaleza07@hotmail.com", aniv: "29/09", canga: "BRAVO", par: 191, plantao: "GOLF", faxina: "G1" },
   { mat: 144, ng: "SAMUEL SANTOS", nc: "Samuel da Silva Santos", email: "samuelpray00@gmail.com", aniv: "15/11", canga: "ALPHA", par: 94, plantao: "HOTEL", faxina: "G3" },
   { mat: 153, ng: "HUGO", nc: "Hugo Telis Cavalcante", email: "hugotelis@gmail.com", aniv: "02/01", canga: "ALPHA", par: 174, plantao: "INDIA", faxina: "G1" },
   { mat: 165, ng: "KEVIN GOMES", nc: "Kevin Schwantz Gomes da Silva", email: "schwaantz@gmail.com", aniv: "25/06", canga: "BRAVO", par: 131, plantao: "HOTEL", faxina: "G3" },
-  { mat: 167, ng: "GUSTAVO NETO", nc: "Wendell Gustavo Ferreira Neto", email: "Wendellneto22@gmail.com", aniv: "05/07", canga: "BRAVO", par: 186, plantao: "LIMA", faxina: "G2" },
+  { mat: 167, ng: "GUSTAVO NETO", nc: "Wendell Gustavo Ferreira Neto", email: "wendellneto22@gmail.com", aniv: "05/07", canga: "BRAVO", par: 186, plantao: "LIMA", faxina: "G2" },
   { mat: 174, ng: "ALEXANDRE", nc: "Carlos Alexandre de Oliveira Filho", email: "calexandredeof@gmail.com", aniv: "12/03", canga: "ALPHA", par: 153, plantao: "LIMA", faxina: "G1" },
   { mat: 186, ng: "SAMUEL SILVA", nc: "Samuel Dezinho da Silva", email: "samueldezinho50@gmail.com", aniv: "20/09", canga: "BRAVO", par: 167, plantao: "LIMA", faxina: "G2" },
   { mat: 191, ng: "GOMES NASCIMENTO", nc: "Renato Gomes do Nascimento", email: "renatogomes72444@gmail.com", aniv: "18/05", canga: "BRAVO", par: 143, plantao: "GOLF", faxina: "G1" },
@@ -122,44 +129,41 @@ const XERIFES = [
 ]
 
 async function main() {
-  console.log("Seeding database...")
-
-  // Limpa tudo
+  console.log("Limpando banco...")
   await prisma.xerife.deleteMany()
   await prisma.disciplina.deleteMany()
   await prisma.session.deleteMany()
   await prisma.account.deleteMany()
   await prisma.user.deleteMany()
 
-  // Hash padrão: matrícula como senha
+  console.log("Criando alunos...")
   for (const a of ALUNOS) {
-    const senhaHash = await bcrypt.hash(String(a.mat), 12)
+    const hash = await bcrypt.hash(String(a.mat), 12)
     await prisma.user.create({
       data: {
         matricula: a.mat,
         nomeGuerra: a.ng,
         nomeCompleto: a.nc,
-        email: a.email.toLowerCase(),
-        password: senhaHash,
-        isAdmin: !!(a as any).admin,
-        aniversario: (a as any).aniv || null,
-        canga: (a as any).canga || null,
-        grupoPlantao: (a as any).plantao || null,
-        grupoFaxina: (a as any).faxina || null,
+        email: a.email,
+        password: hash,
+        isAdmin: !!a.admin,
+        aniversario: a.aniv || null,
+        canga: a.canga || null,
+        cangaPar: a.par || null,
+        grupoPlantao: a.plantao || null,
+        grupoFaxina: a.faxina || null,
       },
     })
-    console.log(`✓ ${a.mat} ${a.ng}`)
+    console.log(`  ✓ ${a.mat} ${a.ng}`)
   }
 
-  // Disciplinas
+  console.log("Criando disciplinas...")
   for (const [sigla, nome, modulo, cargaTotal, cargaMinistrada, status] of DISCIPLINAS) {
-    await prisma.disciplina.create({
-      data: { sigla: sigla as string, nome: nome as string, modulo: modulo as string, cargaTotal: cargaTotal as number, cargaMinistrada: cargaMinistrada as number, status: status as string },
-    })
+    await prisma.disciplina.create({ data: { sigla, nome, modulo, cargaTotal, cargaMinistrada, status } })
   }
-  console.log(`✓ ${DISCIPLINAS.length} disciplinas`)
+  console.log(`  ✓ ${DISCIPLINAS.length} disciplinas`)
 
-  // Xerifes
+  console.log("Criando xerifes...")
   for (const x of XERIFES) {
     await prisma.xerife.create({
       data: {
@@ -167,13 +171,12 @@ async function main() {
         nomeGuerra: x.ng,
         dataInicio: new Date(x.ini),
         dataFim: x.fim ? new Date(x.fim) : null,
-        atual: !!(x as any).atual,
+        atual: !!x.atual,
       },
     })
   }
-  console.log(`✓ ${XERIFES.length} xerifes`)
-
-  console.log("\nSeed concluído! Senha padrão de cada aluno = número da matrícula.")
+  console.log(`  ✓ ${XERIFES.length} xerifes`)
+  console.log("\nSeed concluído! Senha padrão = número da matrícula.")
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect())

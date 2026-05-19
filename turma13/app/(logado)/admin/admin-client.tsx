@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation"
 
 type Aluno = {
   id: string; matricula: number; nomeGuerra: string; nomeCompleto: string; email: string
-  isAdmin: boolean; aniversario: string | null; canga: string | null; cangaPar: number | null
+  isAdmin: boolean; aniversario: string | null; canga: string | null
   grupoPlantao: string | null; grupoFaxina: string | null
 }
 
 const CAMPO_VAZIO = {
   matricula: "", nomeGuerra: "", nomeCompleto: "", email: "", password: "",
-  aniversario: "", canga: "", cangaPar: "", grupoPlantao: "", grupoFaxina: "",
+  aniversario: "", canga: "", grupoPlantao: "", grupoFaxina: "",
 }
 
 export function AdminClient({ alunos: inicial }: { alunos: Aluno[] }) {
@@ -34,7 +34,7 @@ export function AdminClient({ alunos: inicial }: { alunos: Aluno[] }) {
     setForm({
       matricula: String(a.matricula), nomeGuerra: a.nomeGuerra, nomeCompleto: a.nomeCompleto,
       email: a.email, password: "", aniversario: a.aniversario || "", canga: a.canga || "",
-      cangaPar: a.cangaPar ? String(a.cangaPar) : "", grupoPlantao: a.grupoPlantao || "",
+      grupoPlantao: a.grupoPlantao || "",
       grupoFaxina: a.grupoFaxina || "",
     })
     setShowForm(true)
@@ -93,7 +93,6 @@ export function AdminClient({ alunos: inicial }: { alunos: Aluno[] }) {
             ["Senha" + (editId ? " (deixe em branco p/ manter)" : ""), "password", "password"],
             ["Aniversário (DD/MM)", "aniversario", "text"],
             ["Canga (ALPHA/BRAVO/FEMININO)", "canga", "text"],
-            ["Matrícula do par (canga)", "cangaPar", "number"],
             ["Grupo Plantão", "grupoPlantao", "text"],
             ["Grupo Faxina", "grupoFaxina", "text"],
           ].map(([label, key, type]) => (

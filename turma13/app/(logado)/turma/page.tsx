@@ -52,7 +52,7 @@ export default async function TurmaPage() {
   const alunos = await prisma.user.findMany({
     where: { isAdmin: false },
     orderBy: { matricula: "asc" },
-    select: { matricula: true, nomeGuerra: true, nomeCompleto: true, email: true, canga: true, cangaPar: true, grupoPlantao: true, grupoFaxina: true },
+    select: { matricula: true, nomeGuerra: true, nomeCompleto: true, email: true, canga: true, grupoPlantao: true, grupoFaxina: true },
   })
 
   return (

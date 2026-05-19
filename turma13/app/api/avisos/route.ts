@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   const session = await auth()
   if (!(session?.user as any)?.isAdmin) return NextResponse.json({ error: "Não autorizado" }, { status: 403 })
 
-  const { titulo, corpo, fixado } = await req.json()
-  const aviso = await prisma.aviso.create({ data: { titulo, corpo, fixado: !!fixado } })
+  const { titulo, corpo, fixado, destaque } = await req.json()
+  const aviso = await prisma.aviso.create({ data: { titulo, corpo, fixado: !!fixado, destaque: !!destaque } })
   return NextResponse.json(aviso)
 }

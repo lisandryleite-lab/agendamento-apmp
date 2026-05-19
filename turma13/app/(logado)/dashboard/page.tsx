@@ -18,7 +18,7 @@ export default async function DashboardPage() {
   const matricula = user.matricula
 
   const [aluno, missao, aviso, xerife] = await Promise.all([
-    prisma.user.findUnique({ where: { matricula }, select: { nomeGuerra: true, nomeCompleto: true, email: true, canga: true, cangaPar: true, grupoPlantao: true, grupoFaxina: true, aniversario: true } }),
+    prisma.user.findUnique({ where: { matricula }, select: { nomeGuerra: true, nomeCompleto: true, email: true, canga: true, grupoPlantao: true, grupoFaxina: true, aniversario: true } }),
     prisma.missao.findFirst({ where: { semana: SEMANA_ATUAL } }),
     prisma.aviso.findFirst({ orderBy: [{ fixado: "desc" }, { createdAt: "desc" }] }),
     prisma.xerife.findFirst({ where: { atual: true } }),
@@ -40,7 +40,7 @@ export default async function DashboardPage() {
           <div className="space-y-1.5 text-sm">
             <p><span className="text-slate-500">Nome completo:</span> <span className="font-medium">{aluno?.nomeCompleto}</span></p>
             <p><span className="text-slate-500">E-mail:</span> <span className="font-medium">{aluno?.email}</span></p>
-            {aluno?.canga && <p><span className="text-slate-500">Canga:</span> <span className="font-medium">{aluno.canga}{aluno.cangaPar ? ` (par: ${aluno.cangaPar})` : ""}</span></p>}
+            {aluno?.canga && <p><span className="text-slate-500">Canga:</span> <span className="font-medium">{aluno.canga}</span></p>}
             {aluno?.grupoPlantao && <p><span className="text-slate-500">Plantão:</span> <span className="font-medium">{aluno.grupoPlantao}</span></p>}
             {aluno?.grupoFaxina && <p><span className="text-slate-500">Faxina:</span> <span className="font-medium">{aluno.grupoFaxina}</span></p>}
             {aluno?.aniversario && <p><span className="text-slate-500">Aniversário:</span> <span className="font-medium">{aluno.aniversario}</span></p>}
