@@ -29,14 +29,14 @@ export default async function DashboardPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--serif)", color: "var(--azul-profundo)" }}">Olá, {aluno?.nomeGuerra}!</h1>
+        <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--serif)", color: "var(--azul-profundo)" }}>Olá, {aluno?.nomeGuerra}!</h1>
         <p className="text-slate-500 text-sm mt-1">Semana {semana}/52 · Mat. {matricula}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* Dados do aluno */}
         <div className="bg-white rounded-xl p-5 border border-blue-100 shadow-sm col-span-full sm:col-span-1">
-          <h2 className="font-semibold text-sm mb-3" style={{ color: "var(--azul-profundo)" }}">Seus dados</h2>
+          <h2 className="font-semibold text-sm mb-3" style={{ color: "var(--azul-profundo)" }}>Seus dados</h2>
           <div className="space-y-1.5 text-sm">
             <p><span className="text-slate-500">Nome completo:</span> <span className="font-medium">{aluno?.nomeCompleto}</span></p>
             <p><span className="text-slate-500">E-mail:</span> <span className="font-medium">{aluno?.email}</span></p>
@@ -49,12 +49,12 @@ export default async function DashboardPage() {
 
         {/* Missão da Semana */}
         <div className="bg-white rounded-xl p-5 border border-blue-100 shadow-sm">
-          <h2 className="font-semibold text-sm mb-3" style={{ color: "var(--azul-profundo)" }}">Missão da Semana {semana}</h2>
+          <h2 className="font-semibold text-sm mb-3" style={{ color: "var(--azul-profundo)" }}>Missão da Semana {semana}</h2>
           {missao ? (
             <div>
               <p className="font-medium text-slate-800">{missao.titulo}</p>
               <p className="text-slate-500 text-sm mt-1 line-clamp-3">{missao.corpo}</p>
-              <Link href="/missao" className="text-xs mt-2 inline-block hover:underline" style={{ color: "var(--azul-medio)" }}">Ver completa →</Link>
+              <Link href="/missao" className="text-xs mt-2 inline-block hover:underline" style={{ color: "var(--azul-medio)" }}>Ver completa →</Link>
             </div>
           ) : (
             <p className="text-slate-400 text-sm">Não definida ainda</p>
@@ -63,7 +63,7 @@ export default async function DashboardPage() {
 
         {/* Xerife */}
         <div className="bg-white rounded-xl p-5 border border-blue-100 shadow-sm text-center">
-          <h2 className="font-semibold text-sm mb-3" style={{ color: "var(--azul-profundo)" }}">Xerife Atual</h2>
+          <h2 className="font-semibold text-sm mb-3" style={{ color: "var(--azul-profundo)" }}>Xerife Atual</h2>
           {xerife ? (
             <>
               <div className="text-3xl mb-1">⭐</div>
@@ -87,10 +87,10 @@ export default async function DashboardPage() {
         {/* Links rápidos */}
         <div className="col-span-full grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { href: "/qts", label: "QTS", emoji: "📅" },
-            { href: "/aulas", label: "Aulas", emoji: "📚" },
-            { href: "/escalas", label: "Escalas", emoji: "🔄" },
-            { href: "/turma", label: "Turma", emoji: "👥" },
+            { href: "/qts",     label: "QTS",    emoji: "📅" },
+            { href: "/aulas",   label: "Aulas",  emoji: "📚" },
+            { href: "/escalas", label: "Escalas",emoji: "🔄" },
+            { href: "/turma",   label: "Turma",  emoji: "👥" },
           ].map((l) => (
             <Link key={l.href} href={l.href}
               className="bg-white border border-blue-100 rounded-xl p-4 text-center hover:border-blue-300 hover:bg-blue-50 transition-colors shadow-sm">
