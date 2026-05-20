@@ -5,24 +5,19 @@ import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 
-const BASE = "/turma13cfo2026"
-
 const NAV_ALUNO = [
-  { href: `${BASE}/ranking`, label: "Ranking" },
-  { href: `${BASE}/notas`, label: "Minhas Notas" },
-  { href: `${BASE}/escalas`, label: "Escalas" },
-  { href: `${BASE}/avisos`, label: "Avisos" },
-  { href: `${BASE}/links`, label: "Links" },
+  { href: "/ranking",  label: "Ranking" },
+  { href: "/escalas",  label: "Escalas" },
+  { href: "/avisos",   label: "Avisos" },
+  { href: "/links",    label: "Links" },
 ]
 
 const NAV_ADMIN = [
-  { href: `${BASE}/ranking`, label: "Ranking" },
-  { href: `${BASE}/admin/alunos`, label: "Alunos" },
-  { href: `${BASE}/admin/notas`, label: "Notas" },
-  { href: `${BASE}/admin/historico`, label: "Histórico" },
-  { href: `${BASE}/admin/escalas`, label: "Escalas" },
-  { href: `${BASE}/avisos`, label: "Avisos" },
-  { href: `${BASE}/links`, label: "Links" },
+  { href: "/ranking",  label: "Ranking" },
+  { href: "/escalas",  label: "Escalas" },
+  { href: "/avisos",   label: "Avisos" },
+  { href: "/links",    label: "Links" },
+  { href: "/admin",    label: "Admin" },
 ]
 
 export function AppNav({ isAdmin, nomeGuerra }: { isAdmin: boolean; nomeGuerra: string }) {
