@@ -25,15 +25,18 @@ export function calcularServico(semana: number): {
 
 // ─────────────────────────────────────────────────────────────
 //  Grupo de plantão externo — cicla a cada dia corrido
-//  Verificado: 01/05/2026 (dia 121 do ano) = LIMA
+//  Referência confirmada: 20/05/2026 (terça) = LIMA
+//  Ciclo: LIMA → GOLF → HOTEL → INDIA → JULIETT → KILO → (repete)
+//  Inclui fins de semana
 // ─────────────────────────────────────────────────────────────
 export const GRUPOS_PLANTAO = ["LIMA", "GOLF", "HOTEL", "INDIA", "JULIETT", "KILO"] as const
 export type GrupoPlantao = typeof GRUPOS_PLANTAO[number]
 
+// Referência: 20/05/2026 = LIMA (índice 0) — confirmado pela turma
+const REF_PLANTAO = new Date(2026, 4, 20) // 20 de maio de 2026
+
 export function grupoPlantaoPorData(data: Date): GrupoPlantao {
-  const inicio = new Date(2026, 0, 1) // 01/01/2026 = dia 0 da contagem
-  const diffDias = Math.floor((data.getTime() - inicio.getTime()) / 86_400_000)
-  // 01/01/2026 = índice 0 → LIMA (verificado: 01/05/2026 = dia 120 → 120%6=0 → LIMA ✓)
+  const diffDias = Math.floor((data.getTime() - REF_PLANTAO.getTime()) / 86_400_000)
   return GRUPOS_PLANTAO[((diffDias % 6) + 6) % 6]
 }
 
