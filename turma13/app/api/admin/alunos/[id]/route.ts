@@ -19,7 +19,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const data: any = { ...rest }
   if (rest.matricula) data.matricula = Number(rest.matricula)
-  if (rest.cangaPar) data.cangaPar = Number(rest.cangaPar)
+  data.cangaPar = rest.cangaPar ? Number(rest.cangaPar) : null
   if (password) data.password = await bcrypt.hash(password, 12)
 
   await prisma.user.update({ where: { id }, data })

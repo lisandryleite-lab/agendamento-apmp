@@ -1,12 +1,14 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { calcularMGCSimples } from "@/lib/ranking"
+import { redirect } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
 export default async function RankingPage() {
   const session = await auth()
-  const minha = session!.user.matricula
+  if (!session) redirect("/login")
+  const minha = session.user.matricula
 
   const [alunos, todasNotas] = await Promise.all([
     prisma.user.findMany({

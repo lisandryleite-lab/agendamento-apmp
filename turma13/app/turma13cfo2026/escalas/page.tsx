@@ -1,13 +1,15 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { EscalasClient } from "./escalas-client"
+import { redirect } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
 export default async function EscalasPage() {
   const session = await auth()
-  const isAdmin = session?.user?.isAdmin as boolean
-  const userId = session!.user!.id!
+  if (!session) redirect("/login")
+  const isAdmin = session.user.isAdmin
+  const userId = session.user.id
 
   const [faxinas, servicos, minhasEscalas, alunos] = await Promise.all([
     prisma.escalaTurmaFaxina.findMany({ orderBy: { data: "asc" } }),

@@ -1,14 +1,14 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { QtsAdmin } from "./qts-admin"
+import { semanaAtual } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
-
-const SEMANA_ATUAL = 19
 
 export default async function QtsPage() {
   const session = await auth()
   const isAdmin = session?.user?.isAdmin
+  const SEMANA_ATUAL = semanaAtual()
 
   const qts = await prisma.qTS.findUnique({ where: { semana: SEMANA_ATUAL } })
 

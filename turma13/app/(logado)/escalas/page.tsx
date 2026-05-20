@@ -8,14 +8,9 @@ import {
   MEMBROS_PLANTAO,
   MATRICULAS_ORDEM,
 } from "@/lib/escalas"
+import { semanaAtual } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
-
-function semanaAtual() {
-  const inicio = new Date("2026-01-05")
-  const diff = Date.now() - inicio.getTime()
-  return Math.min(52, Math.max(1, Math.ceil(diff / (7 * 24 * 60 * 60 * 1000))))
-}
 
 function mesAtual() {
   const hoje = new Date()

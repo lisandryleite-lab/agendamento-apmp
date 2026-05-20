@@ -1,14 +1,14 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { MissaoAdmin } from "./missao-admin"
+import { semanaAtual } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
-
-const SEMANA_ATUAL = 19
 
 export default async function MissaoPage() {
   const session = await auth()
   const isAdmin = session?.user?.isAdmin
+  const SEMANA_ATUAL = semanaAtual()
 
   const missoes = await prisma.missao.findMany({ orderBy: { semana: "desc" } })
   const atual = missoes.find((m) => m.semana === SEMANA_ATUAL) || missoes[0]

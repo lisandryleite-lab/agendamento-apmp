@@ -1,12 +1,14 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { NotasClient } from "./notas-client"
+import { redirect } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
 export default async function NotasPage() {
   const session = await auth()
-  const userId = session!.user!.id!
+  if (!session) redirect("/login")
+  const userId = session.user.id
 
   const [notas, disciplinas] = await Promise.all([
     prisma.nota.findMany({ where: { userId }, orderBy: { data: "desc" } }),

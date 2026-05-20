@@ -1,15 +1,9 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { semanaAtual } from "@/lib/utils"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
-
-const DATA_INICIO = new Date("2026-01-05")
-
-function semanaAtual() {
-  const diff = Date.now() - DATA_INICIO.getTime()
-  return Math.min(52, Math.max(1, Math.ceil(diff / (7 * 24 * 60 * 60 * 1000))))
-}
 
 export default async function DashboardPage() {
   const session = await auth()
