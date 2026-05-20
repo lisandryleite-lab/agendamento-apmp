@@ -114,12 +114,12 @@ export const COMPOSICAO_FAXINA: Record<GrupoFaxina, { mat: number; nome: string 
   G8: [{ mat: 7, nome: "ALDO SILVA" }, { mat: 37, nome: "PABLO TORRES" }, { mat: 23, nome: "RODOLFO MOURA" }, { mat: 26, nome: "ANDRÉ" }],
 }
 
-// Composição dos grupos de plantão (turma 13 apenas)
+// Composição dos grupos de plantão — documento oficial 13/04/2026
 export const MEMBROS_PLANTAO: Record<GrupoPlantao, { mat: number; nome: string }[]> = {
-  LIMA:    [{ mat: 108, nome: "LISANDRY" }, { mat: 114, nome: "JOSIANE FARIAS" }, { mat: 131, nome: "JOSÉ INÁCIO" }, { mat: 167, nome: "GUSTAVO NETO" }, { mat: 174, nome: "ALEXANDRE" }, { mat: 186, nome: "SAMUEL SILVA" }],
-  GOLF:    [{ mat: 7, nome: "ALDO SILVA" }, { mat: 19, nome: "THAIS FIGUEIREDO" }, { mat: 57, nome: "CLEYTON" }, { mat: 143, nome: "VIDAL" }, { mat: 191, nome: "GOMES NASCIMENTO" }],
-  HOTEL:   [{ mat: 1, nome: "HELLTON FERNANDES" }, { mat: 13, nome: "JONAS" }, { mat: 23, nome: "RODOLFO MOURA" }, { mat: 45, nome: "GABRIELE COSTA" }, { mat: 54, nome: "ELDER CARVALHO" }, { mat: 98, nome: "JOSE MENEZES"}, { mat: 105, nome: "LUCAS EDUARDO" }, { mat: 106, nome: "RAFAEL RIBEIRO" }, { mat: 144, nome: "SAMUEL SANTOS" }, { mat: 165, nome: "KEVIN GOMES" }],
-  INDIA:   [{ mat: 41, nome: "ALAN SILVA" }, { mat: 60, nome: "JOÃO NUNES" }, { mat: 81, nome: "FERNANDO ROCHA" }, { mat: 116, nome: "BERTIPALHA" }, { mat: 153, nome: "HUGO" }],
-  JULIETT: [{ mat: 55, nome: "SHIRLAYNE" }, { mat: 71, nome: "LEIMIG" }, { mat: 76, nome: "ARAÚJO JR" }, { mat: 94, nome: "ANDRÉ CARDOSO" }, { mat: 131, nome: "JOSÉ INÁCIO" }],
-  KILO:    [{ mat: 26, nome: "ANDRÉ" }, { mat: 37, nome: "PABLO TORRES" }, { mat: 65, nome: "KAUHANNI" }, { mat: 98, nome: "JOSÉ MENEZES" }],
+  GOLF:    [{ mat: 7,   nome: "ALDO SILVA" }, { mat: 19,  nome: "THAIS FIGUEIREDO" }, { mat: 57,  nome: "CLEYTON" }, { mat: 143, nome: "VIDAL" }, { mat: 191, nome: "GOMES NASCIMENTO" }],
+  HOTEL:   [{ mat: 13,  nome: "JONAS" }, { mat: 23,  nome: "RODOLFO MOURA" }, { mat: 45,  nome: "GABRIELE COSTA" }, { mat: 54,  nome: "ELDER CARVALHO" }, { mat: 105, nome: "LUCAS EDUARDO" }, { mat: 106, nome: "RAFAEL RIBEIRO" }, { mat: 144, nome: "SAMUEL SANTOS" }, { mat: 165, nome: "KEVIN GOMES" }],
+  INDIA:   [{ mat: 41,  nome: "ALAN SILVA" }, { mat: 60,  nome: "JOÃO NUNES" }, { mat: 81,  nome: "FERNANDO ROCHA" }, { mat: 116, nome: "BERTIPALHA" }, { mat: 153, nome: "HUGO" }],
+  JULIETT: [{ mat: 55,  nome: "SHIRLAYNE" }, { mat: 71,  nome: "LEIMIG" }, { mat: 76,  nome: "ARAÚJO JR" }, { mat: 94,  nome: "ANDRÉ CARDOSO" }, { mat: 174, nome: "ALEXANDRE" }],
+  KILO:    [{ mat: 26,  nome: "ANDRÉ" }, { mat: 37,  nome: "PABLO TORRES" }, { mat: 65,  nome: "KAUHANNI" }, { mat: 98,  nome: "JOSÉ MENEZES" }],
+  LIMA:    [{ mat: 108, nome: "LISANDRY" }, { mat: 114, nome: "JOSIANE FARIAS" }, { mat: 131, nome: "JOSÉ INÁCIO" }, { mat: 167, nome: "GUSTAVO NETO" }, { mat: 186, nome: "SAMUEL SILVA" }],
 }
