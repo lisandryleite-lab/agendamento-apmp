@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
 
-export default function Root() {
-  redirect("/turma13cfo2026")
+export default function Home() {
+  redirect("/dashboard")
 }
