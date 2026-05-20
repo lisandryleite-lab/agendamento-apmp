@@ -82,7 +82,7 @@ export default async function RankingPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-50 text-gray-500 text-xs uppercase border-b">
-              <th className="px-4 py-3 text-left w-10">#</th>
+              <th className="px-4 py-3 text-left w-16">Posição</th>
               <th className="px-4 py-3 text-left">Nome de Guerra</th>
               <th className="px-4 py-3 text-left hidden sm:table-cell">Mat.</th>
               <th className="px-4 py-3 text-left hidden md:table-cell">Canga</th>
@@ -95,8 +95,8 @@ export default async function RankingPage() {
               return (
                 <tr key={a.matricula}
                   className={`border-t border-gray-100 ${isMe ? "bg-blue-50 font-semibold" : "hover:bg-gray-50"}`}>
-                  <td className="px-4 py-3 text-gray-500">
-                    {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
+                  <td className="px-4 py-3 text-gray-500 font-semibold">
+                    {i === 0 ? "🥇 1º" : i === 1 ? "🥈 2º" : i === 2 ? "🥉 3º" : `${i + 1}º`}
                   </td>
                   <td className="px-4 py-3 text-gray-900">
                     {a.nomeGuerra}

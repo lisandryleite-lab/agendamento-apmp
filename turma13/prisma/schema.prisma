@@ -20,6 +20,7 @@ model User {
   cangaPar     Int?     // matrícula do par de canga
   grupoPlantao String?
   grupoFaxina  String?
+  alojamento   String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 

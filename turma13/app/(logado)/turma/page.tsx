@@ -49,7 +49,7 @@ export default async function TurmaPage() {
     select: {
       matricula: true, nomeGuerra: true, nomeCompleto: true,
       email: true, canga: true, cangaPar: true,
-      grupoPlantao: true, grupoFaxina: true, aniversario: true,
+      grupoPlantao: true, grupoFaxina: true, aniversario: true, alojamento: true,
     },
   })
 

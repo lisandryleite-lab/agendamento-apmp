@@ -6,6 +6,7 @@ type Aluno = {
   matricula: number; nomeGuerra: string; nomeCompleto: string; email: string
   canga: string | null; cangaPar: number | null
   grupoPlantao: string | null; grupoFaxina: string | null; aniversario: string | null
+  alojamento: string | null
 }
 
 function Secao({ titulo, children, defaultAberta = false }: { titulo: string; children: React.ReactNode; defaultAberta?: boolean }) {
@@ -87,6 +88,7 @@ export function TurmaClient({ alunos, nomesPorMat, hierarquia, funcoesFixas, min
                       <div><span style={{ color: "var(--cinza-texto)" }}>Nome completo: </span><strong>{a.nomeCompleto}</strong></div>
                       <div><span style={{ color: "var(--cinza-texto)" }}>E-mail: </span><strong>{a.email}</strong></div>
                       {nomePar && <div><span style={{ color: "var(--cinza-texto)" }}>Par de canga: </span><strong>{nomePar}</strong></div>}
+                      {a.alojamento && <div><span style={{ color: "var(--cinza-texto)" }}>Alojamento: </span><strong>{a.alojamento}</strong></div>}
                       {a.grupoPlantao && <div><span style={{ color: "var(--cinza-texto)" }}>Plantão: </span><strong>{a.grupoPlantao}</strong></div>}
                       {a.grupoFaxina && <div><span style={{ color: "var(--cinza-texto)" }}>Faxina: </span><strong>{a.grupoFaxina}</strong></div>}
                       {a.aniversario && <div><span style={{ color: "var(--cinza-texto)" }}>Aniversário: </span><strong>{a.aniversario}</strong></div>}

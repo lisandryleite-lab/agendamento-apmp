@@ -7,9 +7,9 @@ export default async function LogadoLayout({ children }: { children: React.React
   if (!session) redirect("/login")
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--creme)" }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "var(--creme)" }}>
       <Nav isAdmin={(session.user as any).isAdmin} />
-      <div className="flex-1">{children}</div>
+      <main style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>{children}</main>
     </div>
   )
 }
