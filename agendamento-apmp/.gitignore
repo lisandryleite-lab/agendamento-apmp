@@ -4,3 +4,4 @@ node_modules/
 baileys-session/
 bot-whatsapp.log
 *.log
+bot-url.txt
