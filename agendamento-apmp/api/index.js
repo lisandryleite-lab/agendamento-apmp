@@ -104,13 +104,12 @@ app.post('/api/agendamentos', limiterAgendamento, async (req, res) => {
       status: 'pendente'
     });
 
-    // Notifica todos os titulares da CIA via WhatsApp (vírgula separa múltiplos números)
-    const parseNums = env => env ? env.split(',').map(n => n.trim()).filter(Boolean) : [];
-    const TITULARES = { '1': parseNums(process.env.TITULAR_1_ZAP), '2': parseNums(process.env.TITULAR_2_ZAP) };
-    const msg = msgNovaRequisicao({ tipo, nomeGuerra, al, pel, cia, dataFormatada, horario, horarioSala });
-    (TITULARES[cia] || []).forEach(zap => {
-      enviarMensagem(zap, msg).catch(e => console.error('[WhatsApp] Titular:', e.message));
-    });
+    // Aviso de nova solicitação — enviado apenas para o Lisandry
+    const avisoZap = (process.env.LISANDRY_ZAP || process.env.TITULAR_2_ZAP || '').trim();
+    if (avisoZap) {
+      const msg = msgNovaRequisicao({ tipo, nomeGuerra, al, pel, cia, dataFormatada, horario, horarioSala });
+      enviarMensagem(avisoZap, msg).catch(e => console.error('[WhatsApp] Aviso:', e.message));
+    }
 
     res.status(201).json({ data: { id: agendamento._id } });
   } catch (err) {
