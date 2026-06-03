@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 
+// Algumas redes recusam a consulta SRV exigida por mongodb+srv://
+// (erro "querySrv ECONNREFUSED"). Forçamos um DNS público que aceita SRV.
+try { require('dns').setServers(['8.8.8.8', '1.1.1.1']); } catch {}
+
 let cached = null;
 
 async function connect() {
