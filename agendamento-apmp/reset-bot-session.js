@@ -13,6 +13,10 @@
 
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
+// Alguns provedores/redes recusam a consulta SRV exigida por mongodb+srv://
+// (erro "querySrv ECONNREFUSED"). Forçamos um DNS público que aceita SRV.
+try { require('dns').setServers(['8.8.8.8', '1.1.1.1']); } catch {}
+
 const mongoose = require('mongoose');
 const fs       = require('fs');
 const path     = require('path');
