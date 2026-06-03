@@ -16,7 +16,10 @@ const schema = new mongoose.Schema({
   criadoEm:      { type: Date, default: Date.now },
   decididoEm:    Date,
   avisado:       { type: Boolean, default: false },
-  avisadoEm:     Date
+  avisadoEm:     Date,
+  // Controle de envios feitos pelo bot (substitui o Z-API):
+  avisoRequisicaoEnviado: { type: Boolean, default: false }, // aviso de nova solicitação → Lisandry
+  confirmacaoEnviada:     { type: Boolean, default: false }  // confirmação/rejeição → aluno
 });
 
 schema.index({ status: 1, criadoEm: -1 });

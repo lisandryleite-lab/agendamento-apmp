@@ -8,13 +8,8 @@ const { connect }  = require('../lib/db');
 const Agendamento  = require('../lib/models/Agendamento');
 const AgendaSlot   = require('../lib/models/AgendaSlot');
 const { gerarToken, middleware: exigirAuth } = require('../lib/auth');
-const { enviarMensagem } = require('../lib/whatsapp');
-const {
-  msgNovaRequisicao,
-  msgAprovacaoTerapia,
-  msgAprovacaoSala,
-  msgRejeicao
-} = require('../lib/mensagens');
+// WhatsApp (avisos, confirmações e lembretes) é enviado pelo bot-whatsapp.js,
+// que monitora o banco. A API apenas grava o status; nada é enviado daqui.
 
 const path = require('path');
 
@@ -104,12 +99,7 @@ app.post('/api/agendamentos', limiterAgendamento, async (req, res) => {
       status: 'pendente'
     });
 
-    // Aviso de nova solicitação — enviado apenas para o Lisandry
-    const avisoZap = (process.env.LISANDRY_ZAP || process.env.TITULAR_2_ZAP || '').trim();
-    if (avisoZap) {
-      const msg = msgNovaRequisicao({ tipo, nomeGuerra, al, pel, cia, dataFormatada, horario, horarioSala });
-      enviarMensagem(avisoZap, msg).catch(e => console.error('[WhatsApp] Aviso:', e.message));
-    }
+    // O aviso de nova solicitação (→ Lisandry) é enviado pelo bot-whatsapp.js.
 
     res.status(201).json({ data: { id: agendamento._id } });
   } catch (err) {
@@ -120,7 +110,7 @@ app.post('/api/agendamentos', limiterAgendamento, async (req, res) => {
 // PATCH /api/agendamentos/:id — aprovar ou rejeitar (admin)
 app.patch('/api/agendamentos/:id', exigirAuth, async (req, res) => {
   try {
-    const { status, enviarZap } = req.body;
+    const { status } = req.body;
 
     if (!['aprovado', 'rejeitado', 'nao_compareceu', 'cancelado'].includes(status)) {
       return res.status(400).json({ erro: 'Status inválido' });
@@ -133,13 +123,8 @@ app.patch('/api/agendamentos/:id', exigirAuth, async (req, res) => {
     );
     if (!ag) return res.status(404).json({ erro: 'Agendamento não encontrado' });
 
-    // Envia WhatsApp ao aluno (automático)
-    if (ag.zap && enviarZap !== false && ['aprovado', 'rejeitado'].includes(status)) {
-      const msg = status === 'aprovado'
-        ? (ag.tipo === 'terapia' ? msgAprovacaoTerapia(ag) : msgAprovacaoSala(ag))
-        : msgRejeicao(ag);
-      enviarMensagem(ag.zap, msg).catch(e => console.error('[WhatsApp] Aluno:', e.message));
-    }
+    // A confirmação/rejeição ao aluno é enviada pelo bot-whatsapp.js, que
+    // monitora os agendamentos com status decidido e confirmacaoEnviada=false.
 
     res.json({ data: ag });
   } catch (err) {

@@ -26,11 +26,17 @@ const pino        = require('pino');
 const { connect }             = require('./lib/db');
 const Agendamento             = require('./lib/models/Agendamento');
 const { useMongoDBAuthState } = require('./lib/baileysMongoAuth');
+const {
+  msgNovaRequisicao, msgAprovacaoTerapia, msgAprovacaoSala, msgRejeicao
+} = require('./lib/mensagens');
 
 // ── Configurações ──────────────────────────────────────────────────────────
-const INTERVALO_MS     = 30 * 60 * 1000;  // 30 min
+const INTERVALO_MS     = 30 * 60 * 1000;  // 30 min — checagem de lembretes
+const NOTIF_MS         = 60 * 1000;       // 1 min  — checagem de confirmações/avisos
 const JANELA_MIN_ANTES = 110;             // 1h50
 const JANELA_MAX_ANTES = 130;             // 2h10
+// Número que recebe o aviso de nova solicitação (apenas o Lisandry)
+const AVISO_ZAP        = (process.env.LISANDRY_ZAP || process.env.TITULAR_2_ZAP || '').trim();
 const SESSION_DIR      = path.join(__dirname, 'baileys-session');
 const LOG_FILE         = path.join(__dirname, 'bot-whatsapp.log');
 const PORT             = process.env.PORT || 3001;
@@ -163,6 +169,58 @@ function montarMensagem(ag) {
   );
 }
 
+// ── Envio de texto via WhatsApp ────────────────────────────────────────────
+async function enviarTexto(zap, texto) {
+  const jid = `${String(zap).replace(/\D/g, '')}@s.whatsapp.net`;
+  await sock.sendMessage(jid, { text: texto });
+}
+
+// ── Confirmações (aluno) e avisos de nova solicitação (Lisandry) ────────────
+async function verificarNotificacoes() {
+  if (!pronto) return;
+  try {
+    await connect();
+
+    // 1) Aviso de nova solicitação → Lisandry
+    if (AVISO_ZAP) {
+      const novas = await Agendamento.find({
+        status: 'pendente',
+        avisoRequisicaoEnviado: { $ne: true },
+      }).lean();
+      for (const ag of novas) {
+        try {
+          await enviarTexto(AVISO_ZAP, msgNovaRequisicao(ag));
+          await Agendamento.updateOne({ _id: ag._id }, { avisoRequisicaoEnviado: true });
+          info(`✓ Aviso de nova solicitação enviado (${ag.nomeGuerra}).`);
+        } catch (err) {
+          erro(`Falha no aviso de ${ag.nomeGuerra}: ${err.message}`);
+        }
+      }
+    }
+
+    // 2) Confirmação/rejeição → aluno
+    const decididos = await Agendamento.find({
+      status: { $in: ['aprovado', 'rejeitado'] },
+      confirmacaoEnviada: { $ne: true },
+      zap: { $exists: true, $ne: '' },
+    }).lean();
+    for (const ag of decididos) {
+      try {
+        const msg = ag.status === 'aprovado'
+          ? (ag.tipo === 'terapia' ? msgAprovacaoTerapia(ag) : msgAprovacaoSala(ag))
+          : msgRejeicao(ag);
+        await enviarTexto(ag.zap, msg);
+        await Agendamento.updateOne({ _id: ag._id }, { confirmacaoEnviada: true });
+        info(`✓ ${ag.status === 'aprovado' ? 'Confirmação' : 'Rejeição'} enviada para ${ag.nomeGuerra}.`);
+      } catch (err) {
+        erro(`Falha na confirmação de ${ag.nomeGuerra}: ${err.message}`);
+      }
+    }
+  } catch (err) {
+    erro(`Erro na verificação de notificações: ${err.message}`);
+  }
+}
+
 // ── Verificação de agendamentos ────────────────────────────────────────────
 async function verificar() {
   if (!pronto) { aviso('WhatsApp não conectado — pulando.'); return; }
@@ -223,6 +281,8 @@ async function main() {
   setTimeout(async () => {
     await verificar();
     setInterval(verificar, INTERVALO_MS);
+    await verificarNotificacoes();
+    setInterval(verificarNotificacoes, NOTIF_MS);
   }, 15_000);
 }
 
