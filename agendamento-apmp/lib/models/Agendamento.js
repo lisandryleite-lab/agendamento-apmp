@@ -19,7 +19,8 @@ const schema = new mongoose.Schema({
   avisadoEm:     Date,
   // Controle de envios feitos pelo bot (substitui o Z-API):
   avisoRequisicaoEnviado: { type: Boolean, default: false }, // aviso de nova solicitação → Lisandry
-  confirmacaoEnviada:     { type: Boolean, default: false }  // confirmação/rejeição → aluno
+  confirmacaoEnviada:     { type: Boolean, default: false }, // confirmação/rejeição → aluno
+  remarcadoNotificar:     { type: Boolean, default: false }  // quando true, bot envia aviso de remarcação ao aluno
 });
 
 schema.index({ status: 1, criadoEm: -1 });

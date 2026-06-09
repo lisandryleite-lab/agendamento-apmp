@@ -27,7 +27,7 @@ const { connect }             = require('./lib/db');
 const Agendamento             = require('./lib/models/Agendamento');
 const { useMongoDBAuthState } = require('./lib/baileysMongoAuth');
 const {
-  msgNovaRequisicao, msgAprovacaoTerapia, msgAprovacaoSala, msgRejeicao
+  msgNovaRequisicao, msgAprovacaoTerapia, msgAprovacaoSala, msgRejeicao, msgRemarcacao
 } = require('./lib/mensagens');
 
 // ── Configurações ──────────────────────────────────────────────────────────
@@ -195,6 +195,21 @@ async function verificarNotificacoes() {
         } catch (err) {
           erro(`Falha no aviso de ${ag.nomeGuerra}: ${err.message}`);
         }
+      }
+    }
+
+    // 1b) Aviso de remarcação → aluno
+    const remarcados = await Agendamento.find({
+      remarcadoNotificar: true,
+      zap: { $exists: true, $ne: '' },
+    }).lean();
+    for (const ag of remarcados) {
+      try {
+        await enviarTexto(ag.zap, msgRemarcacao(ag));
+        await Agendamento.updateOne({ _id: ag._id }, { remarcadoNotificar: false });
+        info(`✓ Aviso de remarcação enviado para ${ag.nomeGuerra}.`);
+      } catch (err) {
+        erro(`Falha na remarcação de ${ag.nomeGuerra}: ${err.message}`);
       }
     }
 

@@ -66,4 +66,19 @@ Olá ${nomeGuerra}, infelizmente seu ${tipoLabel} para ${dataFormatada} às ${ho
 Entre em contato com o titular da sua CIA para mais informações ou reagende pelo sistema.`;
 }
 
-module.exports = { msgNovaRequisicao, msgAprovacaoTerapia, msgAprovacaoSala, msgRejeicao };
+function msgRemarcacao({ nomeGuerra, dataFormatada, horario }) {
+  return `🔄 *SESSÃO REMARCADA — Psicologia APMP*
+🧠 _Atendimento com o psicólogo Murilo_
+
+Olá ${nomeGuerra}! A partir de agora o psicólogo Murilo atende *somente às quintas-feiras*.
+
+Por isso, sua sessão foi *remarcada* para:
+📆 *Data:* ${dataFormatada}
+🕐 *Horário:* ${horario}
+
+Se esse novo dia/horário não funcionar para você, responda esta mensagem ou reagende pelo sistema. 🪖
+
+_Mensagem automática — APMP · DAS · PMPE_`;
+}
+
+module.exports = { msgNovaRequisicao, msgAprovacaoTerapia, msgAprovacaoSala, msgRejeicao, msgRemarcacao };
