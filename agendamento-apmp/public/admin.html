@@ -523,13 +523,11 @@
   // ── Agenda Psicólogo ─────────────────────────────────────────────────────
   async function renderPsico() {
     const segunda = getInicioSemana(semanaOffsetPsico);
-    const terca   = new Date(segunda); terca.setDate(segunda.getDate() + 1);
     const quinta  = new Date(segunda); quinta.setDate(segunda.getDate() + 3);
     const domingo = new Date(segunda); domingo.setDate(segunda.getDate() + 6);
     document.getElementById('psicoLabel').textContent = `${formatarData(segunda)} – ${formatarData(domingo)}`;
 
     document.getElementById('psicoHead').innerHTML = '<th>Horário</th>' +
-      `<th>Terça<span class="data-curta">${formatarData(terca)}</span></th>` +
       `<th>Quinta<span class="data-curta">${formatarData(quinta)}</span></th>`;
 
     let dados = {};
@@ -541,7 +539,7 @@
     let html = '';
     HORARIOS_PSICO.forEach(hora => {
       html += `<tr><td>${hora}</td>`;
-      [terca, quinta].forEach(data => {
+      [quinta].forEach(data => {
         const dataIso = isoDate(data);
         const chave   = `${dataIso}-${hora}`;
         const slot    = dados[chave] || {};
@@ -727,7 +725,7 @@
       const dadosSala  = rSala.data || {};
       const agendamentos = (rAgs.data || []).filter(p => p.dataIso === dataStr && p.status === 'aprovado');
 
-      const ehTercaOuQuinta = hoje.getDay() === 2 || hoje.getDay() === 4;
+      const ehTercaOuQuinta = hoje.getDay() === 4;
       const HORARIOS = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'];
 
       let psicoHtml = '';
@@ -739,7 +737,7 @@
           psicoHtml += `<tr><td>${h}</td><td>${nome}</td></tr>`;
         });
       } else {
-        psicoHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem atendimento hoje (ter/qui)</td></tr>';
+        psicoHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem atendimento hoje (quinta)</td></tr>';
       }
 
       let salaHtml = '';

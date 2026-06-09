@@ -542,7 +542,7 @@
   <section class="section">
     <span class="section-tag">Disponibilidade</span>
     <h2 class="section-title">Duas agendas, dois propósitos.</h2>
-    <p class="section-lead">A <strong>agenda do psicólogo</strong> tem horários fixos (terças e quintas, 40min). A <strong>agenda da sala</strong> permite reservar o espaço físico, hora a hora, para atendimento online com psicólogo particular — disponível 24 horas.</p>
+    <p class="section-lead">A <strong>agenda do psicólogo</strong> tem horários fixos (quintas, 40min). A <strong>agenda da sala</strong> permite reservar o espaço físico, hora a hora, para atendimento online com psicólogo particular — disponível 24 horas.</p>
 
     <div class="agenda-tabs">
       <button class="agenda-tab ativo" onclick="trocarAgenda('psico', this)">🧠 Sessões com psicólogo</button>
@@ -553,7 +553,7 @@
       <div class="agenda-header">
         <div>
           <div class="agenda-titulo">Sessões com o psicólogo</div>
-          <div class="agenda-sub">40 minutos · terças e quintas</div>
+          <div class="agenda-sub">40 minutos · quintas</div>
         </div>
         <div class="agenda-nav">
           <button onclick="navegarSemana('psico', -1)">← Anterior</button>
@@ -605,7 +605,7 @@
   <section class="section">
     <span class="section-tag">Como funciona</span>
     <h2 class="section-title">Protocolos da APMP.</h2>
-    <p class="section-lead">Dois fluxos distintos. <strong>Protocolo A</strong>: sessão presencial com o psicólogo da APMP (terças e quintas). <strong>Protocolo B</strong>: uso da sala para atendimento online com psicólogo particular — disponível 24h.</p>
+    <p class="section-lead">Dois fluxos distintos. <strong>Protocolo A</strong>: sessão presencial com o psicólogo da APMP (quintas). <strong>Protocolo B</strong>: uso da sala para atendimento online com psicólogo particular — disponível 24h.</p>
 
     <div class="protocolos-grid">
 
@@ -1062,7 +1062,6 @@
   // ── Agenda do Psicólogo ──────────────────────────────────────────────────
   async function renderPsico() {
     const segunda = getInicioSemana(semanaOffsetPsico);
-    const terca   = new Date(segunda); terca.setDate(segunda.getDate() + 1);
     const quinta  = new Date(segunda); quinta.setDate(segunda.getDate() + 3);
     const domingo = new Date(segunda); domingo.setDate(segunda.getDate() + 6);
 
@@ -1078,7 +1077,7 @@
     const horarios = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     let html = '';
-    [terca, quinta].forEach(data => {
+    [quinta].forEach(data => {
       const nomeDia = DIAS_PT[data.getDay()];
       const dataIso = isoDate(data);
       const passado = data < hoje;
@@ -1217,7 +1216,7 @@
     const hoje = new Date(); hoje.setHours(0,0,0,0);
     for (let i = 0; i < 60 && datas.length < 8; i++) {
       const d = new Date(hoje); d.setDate(hoje.getDate() + i);
-      if (d.getDay() === 2 || d.getDay() === 4) datas.push(d);
+      if (d.getDay() === 4) datas.push(d);
     }
     const sel = document.getElementById('dataTerapia');
     sel.innerHTML = '<option value="">—</option>' + datas.map(d =>
