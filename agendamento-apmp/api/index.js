@@ -140,9 +140,8 @@ app.patch('/api/agendamentos/:id', exigirAuth, async (req, res) => {
 app.get('/api/agenda/psico', async (req, res) => {
   try {
     const inicio = req.query.inicio ? new Date(req.query.inicio + 'T00:00:00') : getSegundaAtual();
-    const terca  = dateAdd(inicio, 1);
     const quinta = dateAdd(inicio, 3);
-    const diasIso = [isoDate(terca), isoDate(quinta)];
+    const diasIso = [isoDate(quinta)];
     const HORARIOS = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
 
     const todasChaves = diasIso.flatMap(d => HORARIOS.map(h => `${d}-${h}`));
