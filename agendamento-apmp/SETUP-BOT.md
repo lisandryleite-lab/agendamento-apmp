@@ -104,7 +104,7 @@ node bot-whatsapp.js   # escaneie o QR novamente
 ```
 ⏰ Lembrete — Psicologia APMP
 
-Olá, SILVA! Sua sessão de terapia está agendada para hoje (Terça, 20/05/2026) às 09:00 às 09:40.
+Olá, SILVA! Sua sessão de terapia está agendada para hoje (Quinta, 22/05/2026) às 09:00 às 09:40.
 
 Não esqueça de avisar ao seu Xerife / Auxiliar antes de sair. 🪖
 

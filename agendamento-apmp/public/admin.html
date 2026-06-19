@@ -725,11 +725,11 @@
       const dadosSala  = rSala.data || {};
       const agendamentos = (rAgs.data || []).filter(p => p.dataIso === dataStr && p.status === 'aprovado');
 
-      const ehTercaOuQuinta = hoje.getDay() === 4;
+      const ehQuinta = hoje.getDay() === 4;
       const HORARIOS = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'];
 
       let psicoHtml = '';
-      if (ehTercaOuQuinta) {
+      if (ehQuinta) {
         HORARIOS.forEach(h => {
           const slot = dadosPsico[`${dataStr}-${h}`] || {};
           const status = slot.status || 'livre';
