@@ -175,6 +175,7 @@
     </div>
     <div class="topbar-acoes">
       <button class="btn-topbar" onclick="imprimirAgendaDia()">🖨 Agenda do Dia</button>
+      <button class="btn-topbar" onclick="imprimirAgendaDia(1)">🖨 Agenda do Dia Seguinte</button>
       <button class="btn-topbar danger" onclick="sair()">Sair</button>
     </div>
   </div>
@@ -710,11 +711,13 @@
     win.document.close();
   }
 
-  function imprimirAgendaDia() {
-    const hoje = new Date();
-    const dataStr = isoDate(hoje);
-    const diaNome = DIAS_PT[hoje.getDay()];
-    const dataFormatada = `${String(hoje.getDate()).padStart(2,'0')}/${String(hoje.getMonth()+1).padStart(2,'0')}/${hoje.getFullYear()}`;
+  function imprimirAgendaDia(offsetDias = 0) {
+    const alvo = new Date();
+    alvo.setDate(alvo.getDate() + offsetDias);
+    const rotulo = offsetDias === 0 ? 'Agenda do Dia' : 'Agenda do Dia Seguinte';
+    const dataStr = isoDate(alvo);
+    const diaNome = DIAS_PT[alvo.getDay()];
+    const dataFormatada = `${String(alvo.getDate()).padStart(2,'0')}/${String(alvo.getMonth()+1).padStart(2,'0')}/${alvo.getFullYear()}`;
 
     Promise.all([
       api(`/api/agenda/psico?inicio=${dataStr}`).catch(() => ({ data: {} })),
@@ -725,7 +728,7 @@
       const dadosSala  = rSala.data || {};
       const agendamentos = (rAgs.data || []).filter(p => p.dataIso === dataStr && p.status === 'aprovado');
 
-      const ehQuinta = hoje.getDay() === 4;
+      const ehQuinta = alvo.getDay() === 4;
       const HORARIOS = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'];
 
       let psicoHtml = '';
@@ -737,7 +740,7 @@
           psicoHtml += `<tr><td>${h}</td><td>${nome}</td></tr>`;
         });
       } else {
-        psicoHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem atendimento hoje (quinta)</td></tr>';
+        psicoHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem atendimento neste dia (atende só quinta)</td></tr>';
       }
 
       let salaHtml = '';
@@ -747,11 +750,11 @@
           salaHtml += `<tr><td>${String(h).padStart(2,'0')}:00</td><td>${slot.aluno || slot.status}</td></tr>`;
         }
       }
-      if (!salaHtml) salaHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem reservas hoje</td></tr>';
+      if (!salaHtml) salaHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem reservas neste dia</td></tr>';
 
       const dataAtual = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
       const html = `<!DOCTYPE html><html lang="pt-BR"><head>
-<meta charset="UTF-8"><title>Agenda do Dia — ${dataFormatada}</title>
+<meta charset="UTF-8"><title>${rotulo} — ${dataFormatada}</title>
 <style>
   body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;padding:30px;color:#222;}
   h1{font-size:16px;text-transform:uppercase;letter-spacing:2px;color:#0F4D3F;text-align:center;border-bottom:2px solid #0F4D3F;padding-bottom:12px;margin-bottom:6px;}
@@ -763,7 +766,7 @@
   .btn-print{margin-top:30px;padding:10px 20px;background:#0F4D3F;color:white;border:none;cursor:pointer;font-size:14px;border-radius:6px;}
   @media print{.btn-print{display:none;}}
 </style></head><body>
-<h1>PMPE · APMP · DAS — Agenda do Dia</h1>
+<h1>PMPE · APMP · DAS — ${rotulo}</h1>
 <div class="data">${diaNome}, ${dataFormatada}</div>
 <h2>🧠 Psicólogo — Murilo</h2>
 <table><tr><th>Horário</th><th>Aluno</th></tr>${psicoHtml}</table>
