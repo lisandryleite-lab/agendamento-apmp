@@ -719,8 +719,15 @@
     const diaNome = DIAS_PT[alvo.getDay()];
     const dataFormatada = `${String(alvo.getDate()).padStart(2,'0')}/${String(alvo.getMonth()+1).padStart(2,'0')}/${alvo.getFullYear()}`;
 
+    // O endpoint do psicólogo espera a SEGUNDA da semana e devolve os slots
+    // da quinta (inicio + 3); como o atendimento só ocorre na quinta, a segunda
+    // é o dia-alvo menos 3 dias. A sala aceita qualquer dia como início.
+    const segundaPsico = new Date(alvo);
+    segundaPsico.setDate(alvo.getDate() - 3);
+    const inicioPsico = isoDate(segundaPsico);
+
     Promise.all([
-      api(`/api/agenda/psico?inicio=${dataStr}`).catch(() => ({ data: {} })),
+      api(`/api/agenda/psico?inicio=${inicioPsico}`).catch(() => ({ data: {} })),
       api(`/api/agenda/sala?inicio=${dataStr}`).catch(() => ({ data: {} })),
       api('/api/agendamentos').catch(() => ({ data: [] }))
     ]).then(([rPsico, rSala, rAgs]) => {
