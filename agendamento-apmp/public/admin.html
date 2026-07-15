@@ -744,41 +744,73 @@
           const slot = dadosPsico[`${dataStr}-${h}`] || {};
           const status = slot.status || 'livre';
           const nome = slot.aluno || (status === 'livre' ? 'Livre' : status);
-          psicoHtml += `<tr><td>${h}</td><td>${nome}</td></tr>`;
+          psicoHtml += `<tr><td class="hora">${h}</td><td class="st st-${status}">${nome}</td></tr>`;
         });
       } else {
-        psicoHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem atendimento neste dia (atende só quinta)</td></tr>';
+        psicoHtml = '<tr><td colspan="2" class="vazio">Sem atendimento neste dia (atende só quinta)</td></tr>';
       }
 
       let salaHtml = '';
       for (let h = 0; h < 24; h++) {
         const slot = dadosSala[`${dataStr}-${h}`] || {};
         if (slot.status && slot.status !== 'livre') {
-          salaHtml += `<tr><td>${String(h).padStart(2,'0')}:00</td><td>${slot.aluno || slot.status}</td></tr>`;
+          salaHtml += `<tr><td class="hora">${String(h).padStart(2,'0')}:00</td><td class="st st-${slot.status}">${slot.aluno || slot.status}</td></tr>`;
         }
       }
-      if (!salaHtml) salaHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem reservas neste dia</td></tr>';
+      if (!salaHtml) salaHtml = '<tr><td colspan="2" class="vazio">Sem reservas neste dia</td></tr>';
 
-      const dataAtual = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
       const html = `<!DOCTYPE html><html lang="pt-BR"><head>
 <meta charset="UTF-8"><title>${rotulo} — ${dataFormatada}</title>
 <style>
-  body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;padding:30px;color:#222;}
-  h1{font-size:16px;text-transform:uppercase;letter-spacing:2px;color:#0F4D3F;text-align:center;border-bottom:2px solid #0F4D3F;padding-bottom:12px;margin-bottom:6px;}
-  .data{text-align:center;color:#666;font-size:13px;margin-bottom:30px;}
-  h2{font-size:14px;text-transform:uppercase;letter-spacing:1px;color:#0F4D3F;margin:24px 0 8px;}
-  table{width:100%;border-collapse:collapse;}
-  th,td{border:1px solid #ddd;padding:8px 12px;font-size:13px;}
-  th{background:#0F4D3F;color:white;}
-  .btn-print{margin-top:30px;padding:10px 20px;background:#0F4D3F;color:white;border:none;cursor:pointer;font-size:14px;border-radius:6px;}
-  @media print{.btn-print{display:none;}}
+  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; box-sizing:border-box; }
+  body{ font-family:Arial,Helvetica,sans-serif; max-width:720px; margin:36px auto; padding:30px; color:#2b2b2b; }
+  h1{ font-family:Georgia,'Times New Roman',serif; font-size:20px; color:#0F4D3F; text-align:center; margin:0 0 4px; }
+  .sub{ text-align:center; color:#5F5E5A; font-size:12px; margin:0 0 2px; }
+  .data{ text-align:center; color:#0F4D3F; font-size:13px; font-weight:700; margin:6px 0 20px; padding-bottom:14px; border-bottom:2px solid #0F4D3F; }
+  h2{ font-family:Georgia,'Times New Roman',serif; font-size:15px; color:#0F4D3F; margin:22px 0 3px; }
+  .h2sub{ font-size:11px; color:#5F5E5A; margin:0 0 10px; }
+  .legenda{ display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:#5F5E5A; margin:6px 0 10px; }
+  .legenda span{ display:inline-flex; align-items:center; gap:6px; }
+  .dot{ width:12px; height:12px; border-radius:4px; display:inline-block; }
+  table{ width:100%; border-collapse:separate; border-spacing:0; margin-bottom:6px; }
+  thead th{ background:#0F4D3F; color:#fff; font-size:11px; letter-spacing:1px; text-transform:uppercase; padding:9px 12px; text-align:left; }
+  thead th:first-child{ border-top-left-radius:8px; }
+  thead th:last-child{ border-top-right-radius:8px; }
+  tbody td{ border-bottom:1px solid rgba(15,77,63,0.12); font-size:13px; padding:9px 12px; }
+  td.hora{ font-weight:700; color:#0F4D3F; width:96px; background:#F6F3EC; }
+  td.st{ font-weight:600; }
+  .st-aprovado{ background:#C0DD97; color:#0F4D3F; }
+  .st-pendente{ background:#FAC775; color:#854F0B; }
+  .st-ocupado{ background:#FCEBEB; color:#A32D2D; font-weight:500; }
+  .st-indisponivel{ background:#F0E8D9; color:#854F0B; font-style:italic; font-weight:500; }
+  .st-livre{ color:#8a8a86; font-weight:400; }
+  .vazio{ color:#8a8a86; font-style:italic; padding:12px; }
+  .btn-print{ margin-top:26px; padding:10px 20px; background:#0F4D3F; color:#fff; border:none; cursor:pointer; font-size:14px; border-radius:8px; }
+  @media print{ .btn-print{ display:none; } body{ margin:0; } }
 </style></head><body>
-<h1>PMPE · APMP · DAS — ${rotulo}</h1>
+<h1>${rotulo}</h1>
+<div class="sub">PMPE · APMP · DAS · Núcleo de Saúde Mental</div>
 <div class="data">${diaNome}, ${dataFormatada}</div>
-<h2>🧠 Psicólogo — Murilo</h2>
-<table><tr><th>Horário</th><th>Aluno</th></tr>${psicoHtml}</table>
-<h2>🚪 Sala</h2>
-<table><tr><th>Horário</th><th>Aluno</th></tr>${salaHtml}</table>
+
+<h2>🧠 Agenda do Psicólogo</h2>
+<div class="h2sub">Murilo · Quintas · 8 horários · 40min</div>
+<div class="legenda">
+  <span><span class="dot" style="background:transparent;border:1px dashed #bbb"></span>Livre</span>
+  <span><span class="dot" style="background:#FAC775"></span>Pendente</span>
+  <span><span class="dot" style="background:#C0DD97"></span>Aprovado</span>
+  <span><span class="dot" style="background:#F0E8D9"></span>Indisponível</span>
+</div>
+<table><thead><tr><th>Horário</th><th>Aluno</th></tr></thead><tbody>${psicoHtml}</tbody></table>
+
+<h2>🚪 Agenda da Sala</h2>
+<div class="legenda">
+  <span><span class="dot" style="background:transparent;border:1px dashed #bbb"></span>Livre</span>
+  <span><span class="dot" style="background:#FAC775"></span>Pendente</span>
+  <span><span class="dot" style="background:#FCEBEB"></span>Reservada</span>
+  <span><span class="dot" style="background:#F0E8D9"></span>Indisponível</span>
+</div>
+<table><thead><tr><th>Horário</th><th>Aluno / Reserva</th></tr></thead><tbody>${salaHtml}</tbody></table>
+
 <button class="btn-print" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
 </body></html>`;
       const win = window.open('', '_blank');
