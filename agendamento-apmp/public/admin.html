@@ -309,6 +309,26 @@
   </div>
 </div>
 
+<!-- MODAL: remarcar atendimento -->
+<div class="modal-overlay" id="modalRemarcar">
+  <div class="modal">
+    <h2>Remarcar atendimento</h2>
+    <p id="remarcarInfo" style="color: var(--cinza-texto); font-size: 13px;"></p>
+    <div class="form-row">
+      <div><label>Nova data *</label><input type="date" id="rm-data"></div>
+      <div>
+        <label>Novo horário *</label>
+        <select id="rm-horario"></select>
+      </div>
+    </div>
+    <p style="color: var(--cinza-texto); font-size: 12px; margin-top: 4px;">O aluno é avisado automaticamente da remarcação (se tiver WhatsApp cadastrado).</p>
+    <div class="modal-acoes">
+      <button class="btn-cancelar" onclick="fecharModalRemarcar()">Cancelar</button>
+      <button class="btn-salvar" onclick="salvarRemarcacao()">Remarcar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: novo pedido manual -->
 <div class="modal-overlay" id="modalNovoPedido">
   <div class="modal">
@@ -513,6 +533,7 @@
         <div class="pedido-acoes">
           ${p.zap ? `<button class="btn btn-zap" onclick="aprovarComZapFallback('${id}','${escape(p.zap)}')">Zap manual ↗</button>` : ''}
           <button class="btn btn-aprovar" onclick="aprovarPedido('${id}')">✓ Aprovar</button>
+          <button class="btn" style="background:#1D6E5A;color:#fff;" data-ag="${escape(JSON.stringify(p))}" onclick="abrirRemarcarFromBtn(this)">🔄 Remarcar</button>
           <button class="btn btn-rejeitar" onclick="rejeitarPedido('${id}')">✕ Rejeitar</button>
           <button class="btn btn-nao-comp" onclick="naoCompareceu('${id}')">Não compareceu</button>
           <button class="btn btn-cancelar-ag" onclick="cancelarPedido('${id}')">Cancelar</button>
@@ -627,10 +648,14 @@
         const btnDeclaracao = p.status === 'aprovado'
           ? `<button class="btn" style="background:var(--dourado);color:white;font-size:11px;" data-ag="${escape(JSON.stringify(p))}" onclick="gerarDeclaracaoFromBtn(this)">📄 Declaração PDF</button>`
           : '';
+        const btnRemarcar = p.status === 'aprovado'
+          ? `<button class="btn" style="background:#1D6E5A;color:#fff;font-size:11px;" data-ag="${escape(JSON.stringify(p))}" onclick="abrirRemarcarFromBtn(this)">🔄 Remarcar</button>`
+          : '';
         return `<div class="hist-item">
           <div>${icone} <strong>${escape(p.nomeGuerra || '')}</strong> · AL ${escape(p.al)} · ${escape(horarioInfo)}
           <br><small>${formatarDataHora(p.criadoEm)}</small></div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            ${btnRemarcar}
             ${btnDeclaracao}
             <span class="badge ${badgeClass}">${badgeText}</span>
           </div>
@@ -881,6 +906,62 @@
       });
       fecharModalSlotSala();
       renderSala();
+    } catch (err) { alert('Erro: ' + err.message); }
+  }
+
+  // ── Remarcar atendimento ─────────────────────────────────────────────────
+  const HORARIOS_PSICO_RM = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'];
+  let remarcandoId = null, remarcandoTipo = 'terapia';
+
+  function abrirRemarcarFromBtn(btn) {
+    try { abrirModalRemarcar(JSON.parse(btn.dataset.ag)); }
+    catch (e) { alert('Não foi possível abrir a remarcação.'); }
+  }
+
+  function abrirModalRemarcar(ag) {
+    remarcandoId   = ag._id;
+    remarcandoTipo = ag.tipo || 'terapia';
+    const horaAtual = remarcandoTipo === 'terapia' ? (ag.horario || '') : (ag.horarioSala || '');
+    document.getElementById('remarcarInfo').textContent =
+      `${ag.nomeGuerra || ''} · AL ${ag.al || ''} — atual: ${ag.dataFormatada || ''} ${horaAtual}`;
+
+    const sel = document.getElementById('rm-horario');
+    if (remarcandoTipo === 'terapia') {
+      sel.innerHTML = HORARIOS_PSICO_RM.map(h => `<option value="${h}">${h}</option>`).join('');
+    } else {
+      let opts = '';
+      for (let h = 0; h < 24; h++) {
+        const label = `${String(h).padStart(2,'0')}:00 às ${String((h+1)%24).padStart(2,'0')}:00`;
+        opts += `<option value="${label}">${label}</option>`;
+      }
+      sel.innerHTML = opts;
+    }
+    document.getElementById('rm-data').value = ag.dataIso || '';
+    document.getElementById('modalRemarcar').classList.add('ativo');
+  }
+
+  function fecharModalRemarcar() {
+    document.getElementById('modalRemarcar').classList.remove('ativo');
+    remarcandoId = null;
+  }
+
+  async function salvarRemarcacao() {
+    if (!remarcandoId) return;
+    const dataIso = document.getElementById('rm-data').value;
+    if (!dataIso) { alert('Selecione a nova data.'); return; }
+    const d = new Date(dataIso + 'T00:00:00');
+    const dataFormatada = `${DIAS_PT[d.getDay()]}, ${formatarData(d)}/${d.getFullYear()}`;
+    const body = { dataIso, dataFormatada };
+    if (remarcandoTipo === 'terapia') {
+      const hBase = document.getElementById('rm-horario').value;
+      body.horario = `${hBase} às ${hBase.split(':')[0].padStart(2,'0')}:40`;
+    } else {
+      body.horarioSala = document.getElementById('rm-horario').value;
+    }
+    try {
+      await api(`/api/agendamentos/${remarcandoId}/remarcar`, { method: 'PATCH', body: JSON.stringify(body) });
+      fecharModalRemarcar();
+      renderTudo();
     } catch (err) { alert('Erro: ' + err.message); }
   }
 
