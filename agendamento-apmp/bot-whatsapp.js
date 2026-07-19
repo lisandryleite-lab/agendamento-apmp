@@ -169,19 +169,6 @@ function montarMensagem(ag) {
   );
 }
 
-// ── Mensagem de lembrete manual (data explícita, sem "hoje") ───────────────
-function montarMensagemLembrete(ag) {
-  const tipo    = ag.tipo === 'terapia' ? 'sessão de terapia' : 'reserva de sala';
-  const horario = ag.tipo === 'terapia' ? ag.horario : ag.horarioSala;
-  return (
-    `⏰ *Lembrete — Psicologia APMP*\n\n` +
-    `Olá, *${ag.nomeGuerra}*! Sua ${tipo} está agendada para ` +
-    `*${ag.dataFormatada}* às *${horario}*.\n\n` +
-    `Não esqueça de avisar ao seu Xerife / Auxiliar antes de sair. 🪖\n\n` +
-    `_Mensagem automática — APMP · DAS · PMPE_`
-  );
-}
-
 // ── Envio de texto via WhatsApp ────────────────────────────────────────────
 async function enviarTexto(zap, texto) {
   const jid = `${String(zap).replace(/\D/g, '')}@s.whatsapp.net`;
@@ -223,21 +210,6 @@ async function verificarNotificacoes() {
         info(`✓ Aviso de remarcação enviado para ${ag.nomeGuerra}.`);
       } catch (err) {
         erro(`Falha na remarcação de ${ag.nomeGuerra}: ${err.message}`);
-      }
-    }
-
-    // 1c) Lembrete manual → aluno (disparado pelo admin no painel)
-    const lembretesManuais = await Agendamento.find({
-      lembreteManualNotificar: true,
-      zap: { $exists: true, $ne: '' },
-    }).lean();
-    for (const ag of lembretesManuais) {
-      try {
-        await enviarTexto(ag.zap, montarMensagemLembrete(ag));
-        await Agendamento.updateOne({ _id: ag._id }, { lembreteManualNotificar: false });
-        info(`✓ Lembrete manual enviado para ${ag.nomeGuerra}.`);
-      } catch (err) {
-        erro(`Falha no lembrete manual de ${ag.nomeGuerra}: ${err.message}`);
       }
     }
 

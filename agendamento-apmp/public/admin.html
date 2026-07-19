@@ -220,11 +220,6 @@
         <span class="legenda-item"><span class="legenda-dot" style="background: #F0E8D9"></span>Indisponível</span>
       </div>
 
-      <div style="margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-        <button class="btn" style="background: #0F4D3F; color: #fff;" onclick="enviarLembretesDoDia()">⏰ Enviar lembretes desta quinta</button>
-        <span class="secao-sub" style="margin: 0;">Envia para todos os aprovados com WhatsApp cadastrado.</span>
-      </div>
-
       <div class="agenda-tabela">
         <div class="agenda-tabela-wrap">
           <table>
@@ -406,7 +401,6 @@
   let tipoNovoPedido  = 'terapia';
   let semanaOffsetPsico = 0;
   let semanaOffsetSala  = 0;
-  let quintaAtualIso    = null;
   let agendamentosPorId = {};
 
   // ── Utilitários ──────────────────────────────────────────────────────────
@@ -555,7 +549,6 @@
   async function renderPsico() {
     const segunda = getInicioSemana(semanaOffsetPsico);
     const quinta  = new Date(segunda); quinta.setDate(segunda.getDate() + 3);
-    quintaAtualIso = isoDate(quinta);
     const domingo = new Date(segunda); domingo.setDate(segunda.getDate() + 6);
     document.getElementById('psicoLabel').textContent = `${formatarData(segunda)} – ${formatarData(domingo)}`;
 
@@ -929,9 +922,30 @@
     } catch (err) { alert('Erro: ' + err.message); }
   }
 
+  // ── WhatsApp manual (bot desativado — abre o chat com a mensagem pronta) ──
+  function abrirWhatsApp(zap, msg) {
+    const num = String(zap || '').replace(/\D/g, '');
+    if (!num) { alert('Aluno sem WhatsApp cadastrado.'); return false; }
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+    return true;
+  }
+  function msgLembreteWa(ag) {
+    const tipo = ag.tipo === 'terapia' ? 'sessão de terapia' : 'reserva de sala';
+    const horario = ag.tipo === 'terapia' ? (ag.horario || '') : (ag.horarioSala || '');
+    return `⏰ *Lembrete — Psicologia APMP*\n\n` +
+      `Olá, *${ag.nomeGuerra || ''}*! Sua ${tipo} está agendada para *${ag.dataFormatada || ''}* às *${horario}*.\n\n` +
+      `Não esqueça de avisar ao seu Xerife / Auxiliar antes de sair. 🪖\n\n_APMP · DAS · PMPE_`;
+  }
+  function msgRemarcacaoWa(nomeGuerra, dataFormatada, horario) {
+    return `🔄 *SESSÃO REMARCADA — Psicologia APMP*\n🧠 _Atendimento com o psicólogo Murilo_\n\n` +
+      `Olá ${nomeGuerra || ''}! Sua sessão foi *remarcada* para:\n` +
+      `📆 *Data:* ${dataFormatada}\n🕐 *Horário:* ${horario}\n\n` +
+      `Se o novo dia/horário não funcionar, responda esta mensagem ou reagende pelo sistema. 🪖\n\n_APMP · DAS · PMPE_`;
+  }
+
   // ── Remarcar atendimento ─────────────────────────────────────────────────
   const HORARIOS_PSICO_RM = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'];
-  let remarcandoId = null, remarcandoTipo = 'terapia';
+  let remarcandoId = null, remarcandoTipo = 'terapia', remarcandoAg = null;
 
   function abrirRemarcarFromBtn(btn) {
     try { abrirModalRemarcar(JSON.parse(btn.dataset.ag)); }
@@ -948,6 +962,7 @@
   function abrirModalRemarcar(ag) {
     remarcandoId   = ag._id;
     remarcandoTipo = ag.tipo || 'terapia';
+    remarcandoAg   = ag;
     const horaAtual = remarcandoTipo === 'terapia' ? (ag.horario || '') : (ag.horarioSala || '');
     document.getElementById('remarcarInfo').textContent =
       `${ag.nomeGuerra || ''} · AL ${ag.al || ''} — atual: ${ag.dataFormatada || ''} ${horaAtual}`;
@@ -986,36 +1001,25 @@
       body.horarioSala = document.getElementById('rm-horario').value;
     }
     const horaLabel = remarcandoTipo === 'terapia' ? body.horario : body.horarioSala;
-    if (!confirm(`Remarcar para ${dataFormatada} às ${horaLabel}?\n\nO aluno será avisado da remarcação no WhatsApp (se tiver número cadastrado).`)) return;
+    if (!confirm(`Remarcar para ${dataFormatada} às ${horaLabel}?\n\nDepois de salvar, o WhatsApp do aluno abre com o aviso pronto para você enviar.`)) return;
     try {
+      const ag = remarcandoAg || {};
       await api(`/api/agendamentos/${remarcandoId}/remarcar`, { method: 'PATCH', body: JSON.stringify(body) });
       fecharModalRemarcar();
       renderTudo();
+      if (ag.zap) abrirWhatsApp(ag.zap, msgRemarcacaoWa(ag.nomeGuerra, dataFormatada, horaLabel));
+      else alert('Remarcado. (Aluno sem WhatsApp cadastrado — avise por outro meio.)');
     } catch (err) { alert('Erro: ' + err.message); }
   }
 
-  // ── Lembrete manual ──────────────────────────────────────────────────────
-  async function enviarLembreteFromBtn(btn) {
+  // ── Lembrete manual (abre o WhatsApp do aluno com a mensagem pronta) ──────
+  function enviarLembreteFromBtn(btn) {
     let ag;
     try { ag = JSON.parse(btn.dataset.ag); } catch (e) { return; }
     if (!ag.zap) { alert('Este aluno não tem WhatsApp cadastrado.'); return; }
     const hora = ag.tipo === 'terapia' ? (ag.horario || '') : (ag.horarioSala || '');
-    if (!confirm(`Enviar lembrete no WhatsApp para ${ag.nomeGuerra} sobre ${ag.dataFormatada} às ${hora}?`)) return;
-    try {
-      await api(`/api/agendamentos/${ag._id}/lembrete`, { method: 'PATCH', body: JSON.stringify({}) });
-      alert('Lembrete enfileirado — o bot enviará em instantes.');
-    } catch (err) { alert('Erro: ' + err.message); }
-  }
-
-  async function enviarLembretesDoDia() {
-    if (!quintaAtualIso) { alert('Abra a Agenda do Psicólogo primeiro.'); return; }
-    const dataBr = quintaAtualIso.split('-').reverse().join('/');
-    if (!confirm(`Enviar lembrete no WhatsApp para TODOS os atendimentos aprovados de ${dataBr} que têm número cadastrado?`)) return;
-    try {
-      const r = await api('/api/agendamentos/lembretes', { method: 'POST', body: JSON.stringify({ dataIso: quintaAtualIso }) });
-      const n = (r.data && r.data.enfileirados) || 0;
-      alert(n > 0 ? `${n} lembrete(s) enfileirado(s) — o bot enviará em instantes.` : 'Nenhum atendimento aprovado com número nesse dia.');
-    } catch (err) { alert('Erro: ' + err.message); }
+    if (!confirm(`Abrir o WhatsApp de ${ag.nomeGuerra} com o lembrete de ${ag.dataFormatada} às ${hora}?`)) return;
+    abrirWhatsApp(ag.zap, msgLembreteWa(ag));
   }
 
   // ── Novo pedido manual ───────────────────────────────────────────────────

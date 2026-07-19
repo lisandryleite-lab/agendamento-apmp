@@ -148,45 +148,9 @@ app.patch('/api/agendamentos/:id/remarcar', exigirAuth, async (req, res) => {
     } else if (horarioSala) {
       ag.horarioSala = horarioSala;
     }
-    // Sinaliza ao bot para avisar o aluno da remarcação (só envia se houver zap).
-    ag.remarcadoNotificar = true;
     await ag.save();
 
     res.json({ data: ag });
-  } catch (err) {
-    res.status(500).json({ erro: err.message });
-  }
-});
-
-// PATCH /api/agendamentos/:id/lembrete — enfileira lembrete manual ao aluno (admin)
-app.patch('/api/agendamentos/:id/lembrete', exigirAuth, async (req, res) => {
-  try {
-    const ag = await Agendamento.findById(req.params.id);
-    if (!ag) return res.status(404).json({ erro: 'Agendamento não encontrado' });
-    if (!ag.zap) return res.status(400).json({ erro: 'Aluno sem WhatsApp cadastrado' });
-
-    // O envio é feito pelo bot-whatsapp.js ao detectar a flag.
-    ag.lembreteManualNotificar = true;
-    await ag.save();
-
-    res.json({ data: ag });
-  } catch (err) {
-    res.status(500).json({ erro: err.message });
-  }
-});
-
-// POST /api/agendamentos/lembretes — enfileira lembrete p/ todos os aprovados de um dia (admin)
-app.post('/api/agendamentos/lembretes', exigirAuth, async (req, res) => {
-  try {
-    const { dataIso } = req.body;
-    if (!dataIso) return res.status(400).json({ erro: 'dataIso obrigatória' });
-
-    const r = await Agendamento.updateMany(
-      { dataIso, status: 'aprovado', zap: { $exists: true, $ne: '' } },
-      { lembreteManualNotificar: true }
-    );
-    const enfileirados = (r.modifiedCount != null ? r.modifiedCount : r.nModified) || 0;
-    res.json({ data: { enfileirados } });
   } catch (err) {
     res.status(500).json({ erro: err.message });
   }
