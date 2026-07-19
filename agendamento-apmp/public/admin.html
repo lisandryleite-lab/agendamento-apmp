@@ -958,6 +958,8 @@
     } else {
       body.horarioSala = document.getElementById('rm-horario').value;
     }
+    const horaLabel = remarcandoTipo === 'terapia' ? body.horario : body.horarioSala;
+    if (!confirm(`Remarcar para ${dataFormatada} às ${horaLabel}?\n\nO aluno será avisado da remarcação no WhatsApp (se tiver número cadastrado).`)) return;
     try {
       await api(`/api/agendamentos/${remarcandoId}/remarcar`, { method: 'PATCH', body: JSON.stringify(body) });
       fecharModalRemarcar();
