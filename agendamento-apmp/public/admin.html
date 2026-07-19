@@ -407,6 +407,7 @@
   let semanaOffsetPsico = 0;
   let semanaOffsetSala  = 0;
   let quintaAtualIso    = null;
+  let agendamentosPorId = {};
 
   // ── Utilitários ──────────────────────────────────────────────────────────
   function getToken() { return sessionStorage.getItem(TOKEN_KEY); }
@@ -494,6 +495,8 @@
   async function renderPedidosEStats() {
     try {
       const { data: pedidos } = await api('/api/agendamentos');
+      agendamentosPorId = {};
+      pedidos.forEach(p => { agendamentosPorId[String(p._id)] = p; });
       renderStats(pedidos);
       renderPedidos(pedidos.filter(p => p.status === 'pendente'));
       renderHistorico(pedidos.filter(p => p.status !== 'pendente'));
@@ -574,7 +577,13 @@
         const slot    = dados[chave] || {};
         const status  = slot.status || 'livre';
         const nome    = slot.aluno || (status === 'livre' ? '' : status === 'indisponivel' ? 'Indisp.' : '');
-        html += `<td><div class="slot ${status}" onclick="abrirModalSlotPsico('${dataIso}','${hora}')">${escape(nome)}</div></td>`;
+        // Atendimento de aluno (aprovado/pendente) → clique abre Remarcar;
+        // slot livre/manual (indisponível) → clique edita o slot.
+        const onclick = slot.agendamentoId
+          ? `remarcarSlotPsico('${slot.agendamentoId}')`
+          : `abrirModalSlotPsico('${dataIso}','${hora}')`;
+        const titulo  = slot.agendamentoId ? ' title="Clique para remarcar"' : '';
+        html += `<td><div class="slot ${status}"${titulo} onclick="${onclick}">${escape(nome)}</div></td>`;
       });
       html += '</tr>';
     });
@@ -927,6 +936,13 @@
   function abrirRemarcarFromBtn(btn) {
     try { abrirModalRemarcar(JSON.parse(btn.dataset.ag)); }
     catch (e) { alert('Não foi possível abrir a remarcação.'); }
+  }
+
+  // Remarcar a partir de um clique na grade da Agenda do Psicólogo
+  function remarcarSlotPsico(agId) {
+    const ag = agendamentosPorId[String(agId)];
+    if (!ag) { alert('Não encontrei os dados deste atendimento. Atualize a página e tente de novo.'); return; }
+    abrirModalRemarcar(ag);
   }
 
   function abrirModalRemarcar(ag) {
