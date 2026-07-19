@@ -5,8 +5,7 @@
   "main": "api/index.js",
   "scripts": {
     "dev": "node api/index.js",
-    "start": "node api/index.js",
-    "bot": "node bot-whatsapp.js"
+    "start": "node api/index.js"
   },
   "engines": {
     "node": ">=18.0.0"
