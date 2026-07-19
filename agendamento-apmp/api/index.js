@@ -132,6 +132,30 @@ app.patch('/api/agendamentos/:id', exigirAuth, async (req, res) => {
   }
 });
 
+// PATCH /api/agendamentos/:id/remarcar — muda data/horário do atendimento (admin)
+app.patch('/api/agendamentos/:id/remarcar', exigirAuth, async (req, res) => {
+  try {
+    const { dataIso, dataFormatada, horario, horarioSala } = req.body;
+    if (!dataIso) return res.status(400).json({ erro: 'dataIso obrigatória' });
+
+    const ag = await Agendamento.findById(req.params.id);
+    if (!ag) return res.status(404).json({ erro: 'Agendamento não encontrado' });
+
+    ag.dataIso = dataIso;
+    if (dataFormatada) ag.dataFormatada = dataFormatada;
+    if (ag.tipo === 'terapia') {
+      if (horario) ag.horario = horario;
+    } else if (horarioSala) {
+      ag.horarioSala = horarioSala;
+    }
+    await ag.save();
+
+    res.json({ data: ag });
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
 // ─────────────────────────────────────────────
 //  AGENDA DO PSICÓLOGO
 // ─────────────────────────────────────────────

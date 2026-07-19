@@ -175,6 +175,7 @@
     </div>
     <div class="topbar-acoes">
       <button class="btn-topbar" onclick="imprimirAgendaDia()">🖨 Agenda do Dia</button>
+      <button class="btn-topbar" onclick="imprimirAgendaDia(1)">🖨 Agenda do Dia Seguinte</button>
       <button class="btn-topbar danger" onclick="sair()">Sair</button>
     </div>
   </div>
@@ -308,6 +309,26 @@
   </div>
 </div>
 
+<!-- MODAL: remarcar atendimento -->
+<div class="modal-overlay" id="modalRemarcar">
+  <div class="modal">
+    <h2>Remarcar atendimento</h2>
+    <p id="remarcarInfo" style="color: var(--cinza-texto); font-size: 13px;"></p>
+    <div class="form-row">
+      <div><label>Nova data *</label><input type="date" id="rm-data"></div>
+      <div>
+        <label>Novo horário *</label>
+        <select id="rm-horario"></select>
+      </div>
+    </div>
+    <p style="color: var(--cinza-texto); font-size: 12px; margin-top: 4px;">O aluno é avisado automaticamente da remarcação (se tiver WhatsApp cadastrado).</p>
+    <div class="modal-acoes">
+      <button class="btn-cancelar" onclick="fecharModalRemarcar()">Cancelar</button>
+      <button class="btn-salvar" onclick="salvarRemarcacao()">Remarcar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: novo pedido manual -->
 <div class="modal-overlay" id="modalNovoPedido">
   <div class="modal">
@@ -380,6 +401,7 @@
   let tipoNovoPedido  = 'terapia';
   let semanaOffsetPsico = 0;
   let semanaOffsetSala  = 0;
+  let agendamentosPorId = {};
 
   // ── Utilitários ──────────────────────────────────────────────────────────
   function getToken() { return sessionStorage.getItem(TOKEN_KEY); }
@@ -467,6 +489,8 @@
   async function renderPedidosEStats() {
     try {
       const { data: pedidos } = await api('/api/agendamentos');
+      agendamentosPorId = {};
+      pedidos.forEach(p => { agendamentosPorId[String(p._id)] = p; });
       renderStats(pedidos);
       renderPedidos(pedidos.filter(p => p.status === 'pendente'));
       renderHistorico(pedidos.filter(p => p.status !== 'pendente'));
@@ -512,6 +536,7 @@
         <div class="pedido-acoes">
           ${p.zap ? `<button class="btn btn-zap" onclick="aprovarComZapFallback('${id}','${escape(p.zap)}')">Zap manual ↗</button>` : ''}
           <button class="btn btn-aprovar" onclick="aprovarPedido('${id}')">✓ Aprovar</button>
+          <button class="btn" style="background:#1D6E5A;color:#fff;" data-ag="${escape(JSON.stringify(p))}" onclick="abrirRemarcarFromBtn(this)">🔄 Remarcar</button>
           <button class="btn btn-rejeitar" onclick="rejeitarPedido('${id}')">✕ Rejeitar</button>
           <button class="btn btn-nao-comp" onclick="naoCompareceu('${id}')">Não compareceu</button>
           <button class="btn btn-cancelar-ag" onclick="cancelarPedido('${id}')">Cancelar</button>
@@ -545,7 +570,13 @@
         const slot    = dados[chave] || {};
         const status  = slot.status || 'livre';
         const nome    = slot.aluno || (status === 'livre' ? '' : status === 'indisponivel' ? 'Indisp.' : '');
-        html += `<td><div class="slot ${status}" onclick="abrirModalSlotPsico('${dataIso}','${hora}')">${escape(nome)}</div></td>`;
+        // Atendimento de aluno (aprovado/pendente) → clique abre Remarcar;
+        // slot livre/manual (indisponível) → clique edita o slot.
+        const onclick = slot.agendamentoId
+          ? `remarcarSlotPsico('${slot.agendamentoId}')`
+          : `abrirModalSlotPsico('${dataIso}','${hora}')`;
+        const titulo  = slot.agendamentoId ? ' title="Clique para remarcar"' : '';
+        html += `<td><div class="slot ${status}"${titulo} onclick="${onclick}">${escape(nome)}</div></td>`;
       });
       html += '</tr>';
     });
@@ -626,10 +657,18 @@
         const btnDeclaracao = p.status === 'aprovado'
           ? `<button class="btn" style="background:var(--dourado);color:white;font-size:11px;" data-ag="${escape(JSON.stringify(p))}" onclick="gerarDeclaracaoFromBtn(this)">📄 Declaração PDF</button>`
           : '';
+        const btnRemarcar = p.status === 'aprovado'
+          ? `<button class="btn" style="background:#1D6E5A;color:#fff;font-size:11px;" data-ag="${escape(JSON.stringify(p))}" onclick="abrirRemarcarFromBtn(this)">🔄 Remarcar</button>`
+          : '';
+        const btnLembrete = (p.status === 'aprovado' && p.zap)
+          ? `<button class="btn" style="background:#0F4D3F;color:#fff;font-size:11px;" data-ag="${escape(JSON.stringify(p))}" onclick="enviarLembreteFromBtn(this)">⏰ Lembrete</button>`
+          : '';
         return `<div class="hist-item">
           <div>${icone} <strong>${escape(p.nomeGuerra || '')}</strong> · AL ${escape(p.al)} · ${escape(horarioInfo)}
           <br><small>${formatarDataHora(p.criadoEm)}</small></div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            ${btnLembrete}
+            ${btnRemarcar}
             ${btnDeclaracao}
             <span class="badge ${badgeClass}">${badgeText}</span>
           </div>
@@ -710,14 +749,23 @@
     win.document.close();
   }
 
-  function imprimirAgendaDia() {
-    const hoje = new Date();
-    const dataStr = isoDate(hoje);
-    const diaNome = DIAS_PT[hoje.getDay()];
-    const dataFormatada = `${String(hoje.getDate()).padStart(2,'0')}/${String(hoje.getMonth()+1).padStart(2,'0')}/${hoje.getFullYear()}`;
+  function imprimirAgendaDia(offsetDias = 0) {
+    const alvo = new Date();
+    alvo.setDate(alvo.getDate() + offsetDias);
+    const rotulo = offsetDias === 0 ? 'Agenda do Dia' : 'Agenda do Dia Seguinte';
+    const dataStr = isoDate(alvo);
+    const diaNome = DIAS_PT[alvo.getDay()];
+    const dataFormatada = `${String(alvo.getDate()).padStart(2,'0')}/${String(alvo.getMonth()+1).padStart(2,'0')}/${alvo.getFullYear()}`;
+
+    // O endpoint do psicólogo espera a SEGUNDA da semana e devolve os slots
+    // da quinta (inicio + 3); como o atendimento só ocorre na quinta, a segunda
+    // é o dia-alvo menos 3 dias. A sala aceita qualquer dia como início.
+    const segundaPsico = new Date(alvo);
+    segundaPsico.setDate(alvo.getDate() - 3);
+    const inicioPsico = isoDate(segundaPsico);
 
     Promise.all([
-      api(`/api/agenda/psico?inicio=${dataStr}`).catch(() => ({ data: {} })),
+      api(`/api/agenda/psico?inicio=${inicioPsico}`).catch(() => ({ data: {} })),
       api(`/api/agenda/sala?inicio=${dataStr}`).catch(() => ({ data: {} })),
       api('/api/agendamentos').catch(() => ({ data: [] }))
     ]).then(([rPsico, rSala, rAgs]) => {
@@ -725,7 +773,7 @@
       const dadosSala  = rSala.data || {};
       const agendamentos = (rAgs.data || []).filter(p => p.dataIso === dataStr && p.status === 'aprovado');
 
-      const ehQuinta = hoje.getDay() === 4;
+      const ehQuinta = alvo.getDay() === 4;
       const HORARIOS = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'];
 
       let psicoHtml = '';
@@ -734,41 +782,73 @@
           const slot = dadosPsico[`${dataStr}-${h}`] || {};
           const status = slot.status || 'livre';
           const nome = slot.aluno || (status === 'livre' ? 'Livre' : status);
-          psicoHtml += `<tr><td>${h}</td><td>${nome}</td></tr>`;
+          psicoHtml += `<tr><td class="hora">${h}</td><td class="st st-${status}">${nome}</td></tr>`;
         });
       } else {
-        psicoHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem atendimento hoje (quinta)</td></tr>';
+        psicoHtml = '<tr><td colspan="2" class="vazio">Sem atendimento neste dia (atende só quinta)</td></tr>';
       }
 
       let salaHtml = '';
       for (let h = 0; h < 24; h++) {
         const slot = dadosSala[`${dataStr}-${h}`] || {};
         if (slot.status && slot.status !== 'livre') {
-          salaHtml += `<tr><td>${String(h).padStart(2,'0')}:00</td><td>${slot.aluno || slot.status}</td></tr>`;
+          salaHtml += `<tr><td class="hora">${String(h).padStart(2,'0')}:00</td><td class="st st-${slot.status}">${slot.aluno || slot.status}</td></tr>`;
         }
       }
-      if (!salaHtml) salaHtml = '<tr><td colspan="2" style="color:#888;font-style:italic;">Sem reservas hoje</td></tr>';
+      if (!salaHtml) salaHtml = '<tr><td colspan="2" class="vazio">Sem reservas neste dia</td></tr>';
 
-      const dataAtual = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
       const html = `<!DOCTYPE html><html lang="pt-BR"><head>
-<meta charset="UTF-8"><title>Agenda do Dia — ${dataFormatada}</title>
+<meta charset="UTF-8"><title>${rotulo} — ${dataFormatada}</title>
 <style>
-  body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;padding:30px;color:#222;}
-  h1{font-size:16px;text-transform:uppercase;letter-spacing:2px;color:#0F4D3F;text-align:center;border-bottom:2px solid #0F4D3F;padding-bottom:12px;margin-bottom:6px;}
-  .data{text-align:center;color:#666;font-size:13px;margin-bottom:30px;}
-  h2{font-size:14px;text-transform:uppercase;letter-spacing:1px;color:#0F4D3F;margin:24px 0 8px;}
-  table{width:100%;border-collapse:collapse;}
-  th,td{border:1px solid #ddd;padding:8px 12px;font-size:13px;}
-  th{background:#0F4D3F;color:white;}
-  .btn-print{margin-top:30px;padding:10px 20px;background:#0F4D3F;color:white;border:none;cursor:pointer;font-size:14px;border-radius:6px;}
-  @media print{.btn-print{display:none;}}
+  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; box-sizing:border-box; }
+  body{ font-family:Arial,Helvetica,sans-serif; max-width:720px; margin:36px auto; padding:30px; color:#2b2b2b; }
+  h1{ font-family:Georgia,'Times New Roman',serif; font-size:20px; color:#0F4D3F; text-align:center; margin:0 0 4px; }
+  .sub{ text-align:center; color:#5F5E5A; font-size:12px; margin:0 0 2px; }
+  .data{ text-align:center; color:#0F4D3F; font-size:13px; font-weight:700; margin:6px 0 20px; padding-bottom:14px; border-bottom:2px solid #0F4D3F; }
+  h2{ font-family:Georgia,'Times New Roman',serif; font-size:15px; color:#0F4D3F; margin:22px 0 3px; }
+  .h2sub{ font-size:11px; color:#5F5E5A; margin:0 0 10px; }
+  .legenda{ display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:#5F5E5A; margin:6px 0 10px; }
+  .legenda span{ display:inline-flex; align-items:center; gap:6px; }
+  .dot{ width:12px; height:12px; border-radius:4px; display:inline-block; }
+  table{ width:100%; border-collapse:separate; border-spacing:0; margin-bottom:6px; }
+  thead th{ background:#0F4D3F; color:#fff; font-size:11px; letter-spacing:1px; text-transform:uppercase; padding:9px 12px; text-align:left; }
+  thead th:first-child{ border-top-left-radius:8px; }
+  thead th:last-child{ border-top-right-radius:8px; }
+  tbody td{ border-bottom:1px solid rgba(15,77,63,0.12); font-size:13px; padding:9px 12px; }
+  td.hora{ font-weight:700; color:#0F4D3F; width:96px; background:#F6F3EC; }
+  td.st{ font-weight:600; }
+  .st-aprovado{ background:#C0DD97; color:#0F4D3F; }
+  .st-pendente{ background:#FAC775; color:#854F0B; }
+  .st-ocupado{ background:#FCEBEB; color:#A32D2D; font-weight:500; }
+  .st-indisponivel{ background:#F0E8D9; color:#854F0B; font-style:italic; font-weight:500; }
+  .st-livre{ color:#8a8a86; font-weight:400; }
+  .vazio{ color:#8a8a86; font-style:italic; padding:12px; }
+  .btn-print{ margin-top:26px; padding:10px 20px; background:#0F4D3F; color:#fff; border:none; cursor:pointer; font-size:14px; border-radius:8px; }
+  @media print{ .btn-print{ display:none; } body{ margin:0; } }
 </style></head><body>
-<h1>PMPE · APMP · DAS — Agenda do Dia</h1>
+<h1>${rotulo}</h1>
+<div class="sub">PMPE · APMP · DAS · Núcleo de Saúde Mental</div>
 <div class="data">${diaNome}, ${dataFormatada}</div>
-<h2>🧠 Psicólogo — Murilo</h2>
-<table><tr><th>Horário</th><th>Aluno</th></tr>${psicoHtml}</table>
-<h2>🚪 Sala</h2>
-<table><tr><th>Horário</th><th>Aluno</th></tr>${salaHtml}</table>
+
+<h2>🧠 Agenda do Psicólogo</h2>
+<div class="h2sub">Murilo · Quintas · 8 horários · 40min</div>
+<div class="legenda">
+  <span><span class="dot" style="background:transparent;border:1px dashed #bbb"></span>Livre</span>
+  <span><span class="dot" style="background:#FAC775"></span>Pendente</span>
+  <span><span class="dot" style="background:#C0DD97"></span>Aprovado</span>
+  <span><span class="dot" style="background:#F0E8D9"></span>Indisponível</span>
+</div>
+<table><thead><tr><th>Horário</th><th>Aluno</th></tr></thead><tbody>${psicoHtml}</tbody></table>
+
+<h2>🚪 Agenda da Sala</h2>
+<div class="legenda">
+  <span><span class="dot" style="background:transparent;border:1px dashed #bbb"></span>Livre</span>
+  <span><span class="dot" style="background:#FAC775"></span>Pendente</span>
+  <span><span class="dot" style="background:#FCEBEB"></span>Reservada</span>
+  <span><span class="dot" style="background:#F0E8D9"></span>Indisponível</span>
+</div>
+<table><thead><tr><th>Horário</th><th>Aluno / Reserva</th></tr></thead><tbody>${salaHtml}</tbody></table>
+
 <button class="btn-print" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
 </body></html>`;
       const win = window.open('', '_blank');
@@ -840,6 +920,106 @@
       fecharModalSlotSala();
       renderSala();
     } catch (err) { alert('Erro: ' + err.message); }
+  }
+
+  // ── WhatsApp manual (bot desativado — abre o chat com a mensagem pronta) ──
+  function abrirWhatsApp(zap, msg) {
+    const num = String(zap || '').replace(/\D/g, '');
+    if (!num) { alert('Aluno sem WhatsApp cadastrado.'); return false; }
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+    return true;
+  }
+  function msgLembreteWa(ag) {
+    const tipo = ag.tipo === 'terapia' ? 'sessão de terapia' : 'reserva de sala';
+    const horario = ag.tipo === 'terapia' ? (ag.horario || '') : (ag.horarioSala || '');
+    return `⏰ *Lembrete — Psicologia APMP*\n\n` +
+      `Olá, *${ag.nomeGuerra || ''}*! Sua ${tipo} está agendada para *${ag.dataFormatada || ''}* às *${horario}*.\n\n` +
+      `Não esqueça de avisar ao seu Xerife / Auxiliar antes de sair. 🪖\n\n_APMP · DAS · PMPE_`;
+  }
+  function msgRemarcacaoWa(nomeGuerra, dataFormatada, horario) {
+    return `🔄 *SESSÃO REMARCADA — Psicologia APMP*\n🧠 _Atendimento com o psicólogo Murilo_\n\n` +
+      `Olá ${nomeGuerra || ''}! Sua sessão foi *remarcada* para:\n` +
+      `📆 *Data:* ${dataFormatada}\n🕐 *Horário:* ${horario}\n\n` +
+      `Se o novo dia/horário não funcionar, responda esta mensagem ou reagende pelo sistema. 🪖\n\n_APMP · DAS · PMPE_`;
+  }
+
+  // ── Remarcar atendimento ─────────────────────────────────────────────────
+  const HORARIOS_PSICO_RM = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'];
+  let remarcandoId = null, remarcandoTipo = 'terapia', remarcandoAg = null;
+
+  function abrirRemarcarFromBtn(btn) {
+    try { abrirModalRemarcar(JSON.parse(btn.dataset.ag)); }
+    catch (e) { alert('Não foi possível abrir a remarcação.'); }
+  }
+
+  // Remarcar a partir de um clique na grade da Agenda do Psicólogo
+  function remarcarSlotPsico(agId) {
+    const ag = agendamentosPorId[String(agId)];
+    if (!ag) { alert('Não encontrei os dados deste atendimento. Atualize a página e tente de novo.'); return; }
+    abrirModalRemarcar(ag);
+  }
+
+  function abrirModalRemarcar(ag) {
+    remarcandoId   = ag._id;
+    remarcandoTipo = ag.tipo || 'terapia';
+    remarcandoAg   = ag;
+    const horaAtual = remarcandoTipo === 'terapia' ? (ag.horario || '') : (ag.horarioSala || '');
+    document.getElementById('remarcarInfo').textContent =
+      `${ag.nomeGuerra || ''} · AL ${ag.al || ''} — atual: ${ag.dataFormatada || ''} ${horaAtual}`;
+
+    const sel = document.getElementById('rm-horario');
+    if (remarcandoTipo === 'terapia') {
+      sel.innerHTML = HORARIOS_PSICO_RM.map(h => `<option value="${h}">${h}</option>`).join('');
+    } else {
+      let opts = '';
+      for (let h = 0; h < 24; h++) {
+        const label = `${String(h).padStart(2,'0')}:00 às ${String((h+1)%24).padStart(2,'0')}:00`;
+        opts += `<option value="${label}">${label}</option>`;
+      }
+      sel.innerHTML = opts;
+    }
+    document.getElementById('rm-data').value = ag.dataIso || '';
+    document.getElementById('modalRemarcar').classList.add('ativo');
+  }
+
+  function fecharModalRemarcar() {
+    document.getElementById('modalRemarcar').classList.remove('ativo');
+    remarcandoId = null;
+  }
+
+  async function salvarRemarcacao() {
+    if (!remarcandoId) return;
+    const dataIso = document.getElementById('rm-data').value;
+    if (!dataIso) { alert('Selecione a nova data.'); return; }
+    const d = new Date(dataIso + 'T00:00:00');
+    const dataFormatada = `${DIAS_PT[d.getDay()]}, ${formatarData(d)}/${d.getFullYear()}`;
+    const body = { dataIso, dataFormatada };
+    if (remarcandoTipo === 'terapia') {
+      const hBase = document.getElementById('rm-horario').value;
+      body.horario = `${hBase} às ${hBase.split(':')[0].padStart(2,'0')}:40`;
+    } else {
+      body.horarioSala = document.getElementById('rm-horario').value;
+    }
+    const horaLabel = remarcandoTipo === 'terapia' ? body.horario : body.horarioSala;
+    if (!confirm(`Remarcar para ${dataFormatada} às ${horaLabel}?\n\nDepois de salvar, o WhatsApp do aluno abre com o aviso pronto para você enviar.`)) return;
+    try {
+      const ag = remarcandoAg || {};
+      await api(`/api/agendamentos/${remarcandoId}/remarcar`, { method: 'PATCH', body: JSON.stringify(body) });
+      fecharModalRemarcar();
+      renderTudo();
+      if (ag.zap) abrirWhatsApp(ag.zap, msgRemarcacaoWa(ag.nomeGuerra, dataFormatada, horaLabel));
+      else alert('Remarcado. (Aluno sem WhatsApp cadastrado — avise por outro meio.)');
+    } catch (err) { alert('Erro: ' + err.message); }
+  }
+
+  // ── Lembrete manual (abre o WhatsApp do aluno com a mensagem pronta) ──────
+  function enviarLembreteFromBtn(btn) {
+    let ag;
+    try { ag = JSON.parse(btn.dataset.ag); } catch (e) { return; }
+    if (!ag.zap) { alert('Este aluno não tem WhatsApp cadastrado.'); return; }
+    const hora = ag.tipo === 'terapia' ? (ag.horario || '') : (ag.horarioSala || '');
+    if (!confirm(`Abrir o WhatsApp de ${ag.nomeGuerra} com o lembrete de ${ag.dataFormatada} às ${hora}?`)) return;
+    abrirWhatsApp(ag.zap, msgLembreteWa(ag));
   }
 
   // ── Novo pedido manual ───────────────────────────────────────────────────
