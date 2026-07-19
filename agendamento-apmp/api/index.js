@@ -175,6 +175,23 @@ app.patch('/api/agendamentos/:id/lembrete', exigirAuth, async (req, res) => {
   }
 });
 
+// POST /api/agendamentos/lembretes — enfileira lembrete p/ todos os aprovados de um dia (admin)
+app.post('/api/agendamentos/lembretes', exigirAuth, async (req, res) => {
+  try {
+    const { dataIso } = req.body;
+    if (!dataIso) return res.status(400).json({ erro: 'dataIso obrigatória' });
+
+    const r = await Agendamento.updateMany(
+      { dataIso, status: 'aprovado', zap: { $exists: true, $ne: '' } },
+      { lembreteManualNotificar: true }
+    );
+    const enfileirados = (r.modifiedCount != null ? r.modifiedCount : r.nModified) || 0;
+    res.json({ data: { enfileirados } });
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
 // ─────────────────────────────────────────────
 //  AGENDA DO PSICÓLOGO
 // ─────────────────────────────────────────────

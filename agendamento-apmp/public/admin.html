@@ -220,6 +220,11 @@
         <span class="legenda-item"><span class="legenda-dot" style="background: #F0E8D9"></span>Indisponível</span>
       </div>
 
+      <div style="margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <button class="btn" style="background: #0F4D3F; color: #fff;" onclick="enviarLembretesDoDia()">⏰ Enviar lembretes desta quinta</button>
+        <span class="secao-sub" style="margin: 0;">Envia para todos os aprovados com WhatsApp cadastrado.</span>
+      </div>
+
       <div class="agenda-tabela">
         <div class="agenda-tabela-wrap">
           <table>
@@ -401,6 +406,7 @@
   let tipoNovoPedido  = 'terapia';
   let semanaOffsetPsico = 0;
   let semanaOffsetSala  = 0;
+  let quintaAtualIso    = null;
 
   // ── Utilitários ──────────────────────────────────────────────────────────
   function getToken() { return sessionStorage.getItem(TOKEN_KEY); }
@@ -546,6 +552,7 @@
   async function renderPsico() {
     const segunda = getInicioSemana(semanaOffsetPsico);
     const quinta  = new Date(segunda); quinta.setDate(segunda.getDate() + 3);
+    quintaAtualIso = isoDate(quinta);
     const domingo = new Date(segunda); domingo.setDate(segunda.getDate() + 6);
     document.getElementById('psicoLabel').textContent = `${formatarData(segunda)} – ${formatarData(domingo)}`;
 
@@ -981,6 +988,17 @@
     try {
       await api(`/api/agendamentos/${ag._id}/lembrete`, { method: 'PATCH', body: JSON.stringify({}) });
       alert('Lembrete enfileirado — o bot enviará em instantes.');
+    } catch (err) { alert('Erro: ' + err.message); }
+  }
+
+  async function enviarLembretesDoDia() {
+    if (!quintaAtualIso) { alert('Abra a Agenda do Psicólogo primeiro.'); return; }
+    const dataBr = quintaAtualIso.split('-').reverse().join('/');
+    if (!confirm(`Enviar lembrete no WhatsApp para TODOS os atendimentos aprovados de ${dataBr} que têm número cadastrado?`)) return;
+    try {
+      const r = await api('/api/agendamentos/lembretes', { method: 'POST', body: JSON.stringify({ dataIso: quintaAtualIso }) });
+      const n = (r.data && r.data.enfileirados) || 0;
+      alert(n > 0 ? `${n} lembrete(s) enfileirado(s) — o bot enviará em instantes.` : 'Nenhum atendimento aprovado com número nesse dia.');
     } catch (err) { alert('Erro: ' + err.message); }
   }
 
