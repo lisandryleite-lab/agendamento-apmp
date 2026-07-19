@@ -651,10 +651,14 @@
         const btnRemarcar = p.status === 'aprovado'
           ? `<button class="btn" style="background:#1D6E5A;color:#fff;font-size:11px;" data-ag="${escape(JSON.stringify(p))}" onclick="abrirRemarcarFromBtn(this)">🔄 Remarcar</button>`
           : '';
+        const btnLembrete = (p.status === 'aprovado' && p.zap)
+          ? `<button class="btn" style="background:#0F4D3F;color:#fff;font-size:11px;" data-ag="${escape(JSON.stringify(p))}" onclick="enviarLembreteFromBtn(this)">⏰ Lembrete</button>`
+          : '';
         return `<div class="hist-item">
           <div>${icone} <strong>${escape(p.nomeGuerra || '')}</strong> · AL ${escape(p.al)} · ${escape(horarioInfo)}
           <br><small>${formatarDataHora(p.criadoEm)}</small></div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            ${btnLembrete}
             ${btnRemarcar}
             ${btnDeclaracao}
             <span class="badge ${badgeClass}">${badgeText}</span>
@@ -964,6 +968,19 @@
       await api(`/api/agendamentos/${remarcandoId}/remarcar`, { method: 'PATCH', body: JSON.stringify(body) });
       fecharModalRemarcar();
       renderTudo();
+    } catch (err) { alert('Erro: ' + err.message); }
+  }
+
+  // ── Lembrete manual ──────────────────────────────────────────────────────
+  async function enviarLembreteFromBtn(btn) {
+    let ag;
+    try { ag = JSON.parse(btn.dataset.ag); } catch (e) { return; }
+    if (!ag.zap) { alert('Este aluno não tem WhatsApp cadastrado.'); return; }
+    const hora = ag.tipo === 'terapia' ? (ag.horario || '') : (ag.horarioSala || '');
+    if (!confirm(`Enviar lembrete no WhatsApp para ${ag.nomeGuerra} sobre ${ag.dataFormatada} às ${hora}?`)) return;
+    try {
+      await api(`/api/agendamentos/${ag._id}/lembrete`, { method: 'PATCH', body: JSON.stringify({}) });
+      alert('Lembrete enfileirado — o bot enviará em instantes.');
     } catch (err) { alert('Erro: ' + err.message); }
   }
 

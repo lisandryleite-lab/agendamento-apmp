@@ -158,6 +158,23 @@ app.patch('/api/agendamentos/:id/remarcar', exigirAuth, async (req, res) => {
   }
 });
 
+// PATCH /api/agendamentos/:id/lembrete — enfileira lembrete manual ao aluno (admin)
+app.patch('/api/agendamentos/:id/lembrete', exigirAuth, async (req, res) => {
+  try {
+    const ag = await Agendamento.findById(req.params.id);
+    if (!ag) return res.status(404).json({ erro: 'Agendamento não encontrado' });
+    if (!ag.zap) return res.status(400).json({ erro: 'Aluno sem WhatsApp cadastrado' });
+
+    // O envio é feito pelo bot-whatsapp.js ao detectar a flag.
+    ag.lembreteManualNotificar = true;
+    await ag.save();
+
+    res.json({ data: ag });
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
 // ─────────────────────────────────────────────
 //  AGENDA DO PSICÓLOGO
 // ─────────────────────────────────────────────
