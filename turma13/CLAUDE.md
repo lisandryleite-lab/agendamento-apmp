@@ -50,6 +50,8 @@ NEXTAUTH_URL          # URL base da aplicação (ex: https://turma13-apmp.vercel
 | `/xerifancia` | `xerifancia/page.tsx` + `xerifancia-admin.tsx` | Histórico e xerife atual |
 | `/aniversarios` | `aniversarios/page.tsx` | Aniversariantes do mês |
 | `/links` | `links/page.tsx` | Links úteis (cards estáticos) |
+| `/questoes` | `questoes/page.tsx` | Índice das matérias da plataforma de questões |
+| `/questoes/[materia]` | `questoes/[materia]/page.tsx` + `banco-client.tsx` / `simulado-client.tsx` | Banco de questões por bloco e simulado cronometrado; conteúdo em `lib/questoes/` |
 | `/admin` | `admin/page.tsx` + `admin-client.tsx` | Painel admin: gerenciar alunos (CRUD) |
 
 ### Área pública legada — `app/turma13cfo2026/`

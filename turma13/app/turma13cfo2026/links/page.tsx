@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 export default function LinksPage() {
   const links = [
     { label: "Agendar com Psicólogo", url: "https://agendamento-apmp.vercel.app/", desc: "Agendamento APMP" },
@@ -6,7 +8,7 @@ export default function LinksPage() {
     { label: "Drive da Turma 13", url: "https://drive.google.com/drive/folders/1wrNtI9TyT6jNBdMfWlwcGJOwVL-wDqqJ", desc: "Google Drive" },
     { label: "Portal ACIDES / EAD", url: "https://acidesead.sds.pe.gov.br/login/index.php", desc: "Plataforma EAD" },
     { label: "Mementos", url: null, desc: "Em breve" },
-    { label: "Plataforma de Questões", url: null, desc: "Em breve" },
+    { label: "Plataforma de Questões", url: "/questoes", desc: "Banco de questões e simulados", interno: true },
   ]
 
   return (
@@ -19,7 +21,12 @@ export default function LinksPage() {
               <p className="font-medium text-gray-900 text-sm">{l.label}</p>
               <p className="text-xs text-gray-400 mt-0.5">{l.desc}</p>
             </div>
-            {l.url ? (
+            {l.url && l.interno ? (
+              <Link href={l.url}
+                className="shrink-0 bg-blue-900 text-white text-xs px-3 py-1.5 rounded hover:bg-blue-800">
+                Abrir
+              </Link>
+            ) : l.url ? (
               <a href={l.url} target="_blank" rel="noopener noreferrer"
                 className="shrink-0 bg-blue-900 text-white text-xs px-3 py-1.5 rounded hover:bg-blue-800">
                 Abrir

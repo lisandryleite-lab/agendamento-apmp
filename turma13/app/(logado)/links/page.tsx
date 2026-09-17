@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link"
+
 // ─── Ícones SVG inline estilo "logo card" ───────────────────────────────────
 
 function IconSEI() {
@@ -194,12 +196,12 @@ const LINKS = [
   },
   {
     label: "Questões",
-    desc: "Em breve",
-    url: null,
+    desc: "Banco de questões e simulados",
+    url: "/questoes",
+    interno: true,
     bg: "#F5F3FF",
     labelColor: "#7C3AED",
     Icon: IconQuestoes,
-    emBreve: true,
   },
   {
     label: "Financeiro",
@@ -230,7 +232,7 @@ export default function LinksPage() {
         gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
         gap: 16,
       }}>
-        {LINKS.map(({ label, desc, url, bg, labelColor, Icon, emBreve }) => {
+        {LINKS.map(({ label, desc, url, bg, labelColor, Icon, emBreve, interno }) => {
           const cardStyle: React.CSSProperties = {
             background: bg,
             borderRadius: 18,
@@ -282,6 +284,13 @@ export default function LinksPage() {
             </div>
           )
 
+          if (url && interno) {
+            return (
+              <Link key={label} href={url} style={{ textDecoration: "none", display: "block" }}>
+                {inner}
+              </Link>
+            )
+          }
           if (url) {
             return (
               <a key={label} href={url} target="_blank" rel="noopener noreferrer"
