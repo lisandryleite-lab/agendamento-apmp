@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/qts",          label: "QTS",          icon: "📅" },
   { href: "/aulas",        label: "Aulas",        icon: "📚" },
   { href: "/missao",       label: "Missão",       icon: "🎯" },
+  { href: "/questoes",    label: "Questões",     icon: "❓" },
   { href: "/escalas",      label: "Escalas",      icon: "🔄" },
   { href: "/xerifancia",   label: "Xerifância",   icon: "⭐" },
   { href: "/turma",        label: "Turma",        icon: "👥" },
